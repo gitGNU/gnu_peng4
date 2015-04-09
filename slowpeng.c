@@ -16,6 +16,10 @@
 
 
 #define DORKY 1
+#define SKIP_XOR 1
+
+#define BUFSIZE 0x400
+
 
 #define QBITCOPY qbitcopy
 
@@ -23,8 +27,6 @@
 
 #define MALLOC chkmalloc
 
-
-#define BUFSIZE 0x400
 
 
 static unsigned char q2c(unsigned long long x)
@@ -125,18 +127,22 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
         {
             QBITCOPY(buf1, p->perm1[i], buf2, p->perm2[i]);
         }
+#if !SKIP_XOR
         for(i=0; i<blksize; i++)
         {
             QXOR(i, buf2, p->mask);
         }
+#endif
     }
     else
     {
         memcpy(tmpbuf, buf1, blksize);
+#if !SKIP_XOR
         for(i=0; i<blksize; i++)
         {
             QXOR(i, tmpbuf, p->mask);
         }
+#endif
         for(i=0; i<blksize8; i++)
         {
             QBITCOPY(tmpbuf, p->perm2[i], buf2, p->perm1[i]);
@@ -166,6 +172,8 @@ int main(int argc, char **argv)
     memset(buf1, 0, BUFSIZE);
 
     eflag = !strcmp(argv[4], "e");
+    
+    printf("%s -%c-> %s\n", argv[1], eflag?'e':'d', argv[2]);
     
     ps = genpengset(BUFSIZE);
     
@@ -219,6 +227,10 @@ int main(int argc, char **argv)
     }
     close(h1);
     close(h2);
+    /* destroypengset(ps);
+    free(buf1);
+    free(buf2);
+    free(buf3); */
 
     return 0;
 }
