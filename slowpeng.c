@@ -16,9 +16,15 @@
 #include "slowpeng.h"
 
 
+#ifndef DORKY
 #define DORKY 1
+#endif
+#ifndef SKIP_XOR
 #define SKIP_XOR 1
+#endif
+#ifndef SKIP_PERMUT
 #define SKIP_PERMUT 1
+#endif
 
 #define BUFSIZE 0x400
 
@@ -33,7 +39,8 @@
 
 static unsigned char q2c(unsigned long long x)
 {
-    return (unsigned char)((x ^ (x>>8) ^ (x>>16) ^ (x>>24) ^ (x>>32) ^ (x>>40) ^ (x>>48) ^ (x>>56)) & 0xff);
+    /* return (unsigned char)((x ^ (x>>8) ^ (x>>16) ^ (x>>24) ^ (x>>32) ^ (x>>40) ^ (x>>48) ^ (x>>56)) & 0xff); */
+    return (unsigned char)((x ^ (x>>8) ^ (x>>15) ^ (x>>24) ^ (x>>33) ^ (x>>40) ^ (x>>48) ^ ((x>>56)+1)) & 0xff);
 }
 
 
@@ -52,9 +59,9 @@ static void *chkmalloc(unsigned x)
 static void qbitcopy(const unsigned char *buf1, unsigned off1, unsigned char *buf2, unsigned off2)
 {
     if(buf1[off1/8] & (1<<(off1&7)))
-        buf2[off2/8] |= (1<<(off2&7));
+        buf2[off2/8] |= (unsigned char)(1<<(off2&7));
     else
-        buf2[off2/8] &= ~(1<<(off2&7));
+        buf2[off2/8] &= ~(unsigned char)(1<<(off2&7));
 }
 
 
@@ -133,7 +140,7 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
             QBITCOPY(buf1, p->perm1[i], buf2, p->perm2[i]);
         }
 #else
-        memcpy(buf2, buf1, blksize8);
+        memcpy(buf2, buf1, blksize);
 #endif
 #if !SKIP_XOR
         for(i=0; i<blksize; i++)
@@ -157,7 +164,7 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
             QBITCOPY(tmpbuf, p->perm2[i], buf2, p->perm1[i]);
         }
 #else
-        memcpy(buf2, buf1, blksize8);
+        memcpy(buf2, tmpbuf, blksize);
 #endif
     }
 }
@@ -240,10 +247,10 @@ int main(int argc, char **argv)
     }
     close(h1);
     close(h2);
-    /* destroypengset(ps);
+    destroypengset(ps);
     free(buf1);
     free(buf2);
-    free(buf3); */
+    free(buf3);
 
     return 0;
 }
