@@ -26,12 +26,17 @@
 #define SKIP_PERMUT 1
 #endif
 
+#ifndef BUFSIZE
 #define BUFSIZE 0x400
+#endif
 
+#if DEBUG
+#define QBITCOPY(b1,o1,m1,b2,o2,m2) qbitcopy(b1,o1,m1,b2,o2,m2)
+#else
+#define QBITCOPY(b1,o1,m1,b2,o2,m2) qbitcopy(b1,o1,b2,o2)
+#endif
 
-#define QBITCOPY qbitcopy
-
-#define QXOR(i, buf, msk) buf[i] ^= msk[i];
+#define QXOR(i, buf, msk) buf[i] ^= msk[i]
 
 #define MALLOC chkmalloc
 #define MALLOCA alloca
@@ -56,29 +61,51 @@ static void *chkmalloc(unsigned x)
 }
 
 
+#if DEBUG
+static void qbitcopy(const unsigned char *buf1, unsigned off1, unsigned max1, unsigned char *buf2, unsigned off2, unsigned max2)
+{
+    if(off1/8>=max1 || off2/8>=max2)
+    {
+        fprintf(stderr, "PANIC: %u>%u or %u>%u\n", off1/8, max1, off2/8, max2);
+        abort();
+    }
+    
+    if(buf1[off1/8] & (1U<<(off1&7)))
+        buf2[off2/8] |= (unsigned char)(1U<<(off2&7));
+    /*
+    else
+        buf2[off2/8] &= ~(unsigned char)(1U<<(off2&7));
+    */
+}
+#else
 static void qbitcopy(const unsigned char *buf1, unsigned off1, unsigned char *buf2, unsigned off2)
 {
-    if(buf1[off1/8] & (1<<(off1&7)))
-        buf2[off2/8] |= (unsigned char)(1<<(off2&7));
+    if(buf1[off1/8] & (1U<<(off1&7)))
+        buf2[off2/8] |= (unsigned char)(1U<<(off2&7));
+    /*
     else
-        buf2[off2/8] &= ~(unsigned char)(1<<(off2&7));
+        buf2[off2/8] &= ~(unsigned char)(1U<<(off2&7));
+    */
 }
+#endif
 
 
 struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt)
 {
     unsigned blksize8 = blksize*8;
     struct pengset *res = MALLOC(sizeof(struct pengset));
-    char *tempflg1 = MALLOCA(blksize8);
-    char *tempflg2 = MALLOCA(blksize8);
+    char *tempflg1 = MALLOCA(blksize8*sizeof(char));
+    char *tempflg2 = MALLOCA(blksize8*sizeof(char));
     int i,j,k;
     
     memset(tempflg1, 0, blksize8);
     memset(tempflg2, 0, blksize8);
     res->blksize = blksize;
-    res->perm1 = MALLOC(blksize8);
-    res->perm2 = MALLOC(blksize8);
-    res->mask  = MALLOC(blksize);
+    res->perm1 = MALLOC(blksize8*sizeof(unsigned short));
+    res->perm2 = MALLOC(blksize8*sizeof(unsigned short));
+    res->mask  = MALLOC(blksize*sizeof(unsigned char));
+    memset(res->perm1, 0, blksize8);
+    memset(res->perm2, 0, blksize8);
     
     for(i=0; i<blksize8; i++)
     {
@@ -137,7 +164,7 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
 #if !SKIP_PERMUT
         for(i=0; i<blksize8; i++)
         {
-            QBITCOPY(buf1, p->perm1[i], buf2, p->perm2[i]);
+            QBITCOPY(buf1, p->perm1[i], blksize8, buf2, p->perm2[i], blksize8);
         }
 #else
         memcpy(buf2, buf1, blksize);
@@ -161,7 +188,7 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
 #if !SKIP_PERMUT
         for(i=0; i<blksize8; i++)
         {
-            QBITCOPY(tmpbuf, p->perm2[i], buf2, p->perm1[i]);
+            QBITCOPY(tmpbuf, p->perm2[i], blksize8, buf2, p->perm1[i], blksize8);
         }
 #else
         memcpy(buf2, tmpbuf, blksize);

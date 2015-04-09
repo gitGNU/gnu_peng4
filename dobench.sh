@@ -1,12 +1,22 @@
 #! /bin/bash
 
+gentestdata()
+{
+  find /usr/src/linux/ -name "*.c" |while read a
+  do
+    cat "$a"
+  done |buffer
+}
+
 #ulimit -c unlimited
 set -e
 
+#PROXY=valgrind
+
 TESTFILE=testfile
 
-[[ -e $TESTFILE ]] || dd if=/dev/zero of=$TESTFILE bs=1024 count=1048576
+[[ -e $TESTFILE ]] || (gentestdata |dd of=$TESTFILE bs=1024 count=65536 iflag=fullblock)
 
-./slowpeng $TESTFILE ${TESTFILE}_1_enc blabla e
-./slowpeng ${TESTFILE}_1_enc ${TESTFILE}_1_1_dec blabla d
-./slowpeng ${TESTFILE}_1_enc ${TESTFILE}_1_2_dec blablu d
+$PROXY ./slowpeng $TESTFILE ${TESTFILE}_1_enc blabla e
+./slowpeng ${TESTFILE}_1_enc ${TESTFILE}_1_1_dec blablaBLAEH d
+./slowpeng ${TESTFILE}_1_enc ${TESTFILE}_1_2_dec blabluBLORG d
