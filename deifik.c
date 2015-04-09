@@ -38,7 +38,7 @@ static unsigned long genrand(unsigned long int rng_num);
 /* matumoto@math.keio.ac.jp                                        */
 
 
-#include<stdio.h>
+#include <stdio.h>
 
 
 /* Period parameters */
@@ -66,7 +66,7 @@ static int mti[NUM_RNG]; /* mti[x]==N+1 means mt[x][N] is not initialized */
 
 
 /*+ Call this before sgenrand. +*/
-static void init_twister(void)
+void init_twister(void)
 {
     int		i;
 
@@ -77,7 +77,7 @@ static void init_twister(void)
 
 
 /*+ initializing the array with a NONZERO seed. +*/
-static void sgenrand(unsigned long int rng_num, unsigned long seed)
+void sgenrand(unsigned long int rng_num, unsigned long seed)
 {
     /* setting initial seeds to mt[x][N] using         */
     /* the generator Line 25 of Table 1 in          */
@@ -91,7 +91,7 @@ static void sgenrand(unsigned long int rng_num, unsigned long seed)
 
 
 /*+ Make a random number. +*/
-static unsigned long genrand(unsigned long int rng_num)
+unsigned long genrand(unsigned long int rng_num)
 {
     unsigned long y;
 
@@ -144,38 +144,4 @@ static unsigned long genrand(unsigned long int rng_num)
     y ^= TEMPERING_SHIFT_L(y);
 
     return y;
-}
-
-
-/*+ Open a file, exit with message on exit on failure. +*/
-static FILE * Vfopen(const char *FileName, const char *mode)
-{
-    FILE	*fp;
-
-    assert(FileName != NULL);
-    assert(strlen(FileName) > 0);
-    assert(mode != NULL);
-
-    fp = fopen(FileName, mode);
-    if (fp == NULL) {
-	fprintf(stderr, "erfi: Fatal Error: failed to open "
-		"file '%s' in mode '%s'", FileName, mode);
-	exit(EXIT_FAILURE);
-    }
-    return fp;
-}
-
-
-/*+ Write output to ERFI_OUT environment variable or stderr. */
-static void Write_Output(const char *buf, ERFI_Fault_Action FA)
-{
-    FILE	*fp;
-
-    if (Print_File_Name != NULL && FA == ERFI_Print_Env) {
-	fp = Vfopen(Print_File_Name, "a");
-	fprintf(fp, buf);
-	fclose(fp);
-    } else {
-	fprintf(stderr, buf);
-    }
 }
