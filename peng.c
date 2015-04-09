@@ -1,4 +1,16 @@
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <alloca.h>
+#include <string.h>
+
+#include "peng_glob.h"
+
 
 int main(int argc, char **argv)
 {

@@ -2,7 +2,7 @@ DEFS = -DDORKY=0 -DSKIP_XOR=0 -DSKIP_PERMUT=0 -DDEBUG=0
 
 CFLAGS = -O2 -Wall -Wno-pointer-sign -std=c90 -ggdb
 
-SOURCES= slowpeng.c whirlpool.c mt19937ar.c peng.c
+SOURCES= slowpeng.c whirlpool.c mt19937ar.c peng.c peng_misc.c
 
 TARGETS= $(addsuffix .o, $(basename $(SOURCES)))
 

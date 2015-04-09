@@ -38,26 +38,11 @@
 
 #define QXOR(i, buf, msk) buf[i] ^= msk[i]
 
-#define MALLOC chkmalloc
-#define MALLOCA alloca
-
 
 static unsigned char q2c(unsigned long long x)
 {
     /* return (unsigned char)((x ^ (x>>8) ^ (x>>16) ^ (x>>24) ^ (x>>32) ^ (x>>40) ^ (x>>48) ^ (x>>56)) & 0xff); */
     return (unsigned char)((x ^ (x>>8) ^ (x>>15) ^ (x>>24) ^ (x>>33) ^ (x>>40) ^ (x>>48) ^ ((x>>56)+1)) & 0xff);
-}
-
-
-static void *chkmalloc(unsigned x)
-{
-    void *p = malloc(x);
-    if(!p)
-    {
-        fputs("out of memory error\n", stderr);
-        abort();
-    }
-    return p;
 }
 
 
@@ -131,10 +116,10 @@ struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt)
         res->perm1[i] = j;
         res->perm2[i] = k;
     }
-    /*
-    free(tempflg1);
-    free(tempflg2);
-    */
+    
+    FREEA(tempflg1);
+    FREEA(tempflg2);
+    
     for(i=0; i<blksize; i++)
     {
         res->mask[i] = q2c(mersennetwister_genrand_int32(mt));
@@ -146,10 +131,10 @@ struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt)
 
 void destroypengset(struct pengset *p)
 {
-    free(p->perm1);
-    free(p->perm2);
-    free(p->mask);
-    free(p);
+    FREE(p->perm1);
+    FREE(p->perm2);
+    FREE(p->mask);
+    FREE(p);
 }
 
 

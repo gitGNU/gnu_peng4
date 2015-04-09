@@ -24,8 +24,7 @@ struct whirlpool
 };
 
 
-struct whirlpool *whirlpool_processbuffer(void);
+void whirlpool_processbuffer(struct whirlpool *wp);
 void whirlpool_init(struct whirlpool *wp);
 void whirlpool_add(struct whirlpool *wp, const unsigned char * const source, unsigned long sourceBits);
 void whirlpool_finalize(struct whirlpool *wp, unsigned char * const result);
-void whirlpool_destroy(struct whirlpool *wp);

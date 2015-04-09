@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <time.h>
 
 #include "whirlpool.h"
@@ -1194,7 +1195,7 @@ void whirlpool_processbuffer(struct whirlpool *wp)
     uint64_t block[8];    /* mu(buffer) */
     uint64_t state[8];    /* the cipher state */
     uint64_t L[8];
-    uint8_t *buffer = this->buffer;
+    uint8_t *buffer = wp->buffer;
 
 #ifdef TRACE_INTERMEDIATE_VALUES
     printf("The 8x8 matrix Z' derived from the data-string is as follows.\n");
@@ -1228,14 +1229,14 @@ void whirlpool_processbuffer(struct whirlpool *wp)
     /*
      * compute and apply K^0 to the cipher state:
      */
-    state[0] = block[0] ^ (K[0] = hash[0]);
-    state[1] = block[1] ^ (K[1] = hash[1]);
-    state[2] = block[2] ^ (K[2] = hash[2]);
-    state[3] = block[3] ^ (K[3] = hash[3]);
-    state[4] = block[4] ^ (K[4] = hash[4]);
-    state[5] = block[5] ^ (K[5] = hash[5]);
-    state[6] = block[6] ^ (K[6] = hash[6]);
-    state[7] = block[7] ^ (K[7] = hash[7]);
+    state[0] = block[0] ^ (K[0] = wp->hash[0]);
+    state[1] = block[1] ^ (K[1] = wp->hash[1]);
+    state[2] = block[2] ^ (K[2] = wp->hash[2]);
+    state[3] = block[3] ^ (K[3] = wp->hash[3]);
+    state[4] = block[4] ^ (K[4] = wp->hash[4]);
+    state[5] = block[5] ^ (K[5] = wp->hash[5]);
+    state[6] = block[6] ^ (K[6] = wp->hash[6]);
+    state[7] = block[7] ^ (K[7] = wp->hash[7]);
 #ifdef TRACE_INTERMEDIATE_VALUES
     printf("The K_0 matrix (from the initialization value IV) and X'' matrix are as follows.\n");
 
@@ -1477,28 +1478,28 @@ void whirlpool_processbuffer(struct whirlpool *wp)
     /*
      * apply the Miyaguchi-Preneel compression function:
      */
-    hash[0] ^= state[0] ^ block[0];
-    hash[1] ^= state[1] ^ block[1];
-    hash[2] ^= state[2] ^ block[2];
-    hash[3] ^= state[3] ^ block[3];
-    hash[4] ^= state[4] ^ block[4];
-    hash[5] ^= state[5] ^ block[5];
-    hash[6] ^= state[6] ^ block[6];
-    hash[7] ^= state[7] ^ block[7];
+    wp->hash[0] ^= state[0] ^ block[0];
+    wp->hash[1] ^= state[1] ^ block[1];
+    wp->hash[2] ^= state[2] ^ block[2];
+    wp->hash[3] ^= state[3] ^ block[3];
+    wp->hash[4] ^= state[4] ^ block[4];
+    wp->hash[5] ^= state[5] ^ block[5];
+    wp->hash[6] ^= state[6] ^ block[6];
+    wp->hash[7] ^= state[7] ^ block[7];
 #ifdef TRACE_INTERMEDIATE_VALUES
     //printf("Intermediate hash value (after Miyaguchi-Preneel):\n");
     printf("The value of Y' output from the round-function is as follows.\n");
 
     for (i = 0; i < WHIRLPOOL_DIGESTBYTES/8; i++) {
         printf("    %02X %02X %02X %02X %02X %02X %02X %02X\n",
-                (unsigned)(hash[i] >> 56),
-                (unsigned)(hash[i] >> 48),
-                (unsigned)(hash[i] >> 40),
-                (unsigned)(hash[i] >> 32),
-                (unsigned)(hash[i] >> 24),
-                (unsigned)(hash[i] >> 16),
-                (unsigned)(hash[i] >>  8),
-                (unsigned)(hash[i]      ));
+                (unsigned)(wp->hash[i] >> 56),
+                (unsigned)(wp->hash[i] >> 48),
+                (unsigned)(wp->hash[i] >> 40),
+                (unsigned)(wp->hash[i] >> 32),
+                (unsigned)(wp->hash[i] >> 24),
+                (unsigned)(wp->hash[i] >> 16),
+                (unsigned)(wp->hash[i] >>  8),
+                (unsigned)(wp->hash[i]      ));
     }
 
     printf("\n");
@@ -1508,16 +1509,16 @@ void whirlpool_processbuffer(struct whirlpool *wp)
 /**
  * Initialize the hashing state.
  */
-void whirlpool_init()
+void whirlpool_init(struct whirlpool *wp)
 {
     int i;
 
-    memset(bitLength, 0, 32);
-    bufferBits = bufferPos = 0;
-    buffer[0] = 0; /* it's only necessary to cleanup buffer[bufferPos] */
+    memset(wp->bitLength, 0, 32);
+    wp->bufferBits = wp->bufferPos = 0;
+    wp->buffer[0] = 0; /* it's only necessary to cleanup buffer[bufferPos] */
 
     for (i = 0; i < 8; i++) {
-        hash[i] = 0L; /* initial value */
+        wp->hash[i] = 0L; /* initial value */
     }
 
 #ifdef TRACE_INTERMEDIATE_VALUES
@@ -1525,14 +1526,14 @@ void whirlpool_init()
        printf("Initial hash value:\n");
        for (i = 0; i < WHIRLPOOL_DIGESTBYTES/8; i++) {
         printf("    %02X %02X %02X %02X %02X %02X %02X %02X\n",
-            (unsigned)(hash[i] >> 56),
-            (unsigned)(hash[i] >> 48),
-            (unsigned)(hash[i] >> 40),
-            (unsigned)(hash[i] >> 32),
-            (unsigned)(hash[i] >> 24),
-            (unsigned)(hash[i] >> 16),
-            (unsigned)(hash[i] >>  8),
-            (unsigned)(hash[i]      ));
+            (unsigned)(wp->hash[i] >> 56),
+            (unsigned)(wp->hash[i] >> 48),
+            (unsigned)(wp->hash[i] >> 40),
+            (unsigned)(wp->hash[i] >> 32),
+            (unsigned)(wp->hash[i] >> 24),
+            (unsigned)(wp->hash[i] >> 16),
+            (unsigned)(wp->hash[i] >>  8),
+            (unsigned)(wp->hash[i]      ));
        }
        printf("\n");
      */
@@ -1563,13 +1564,13 @@ void whirlpool_add(struct whirlpool *wp, const unsigned char * const source, uns
      */
     int sourcePos    = 0; /* index of leftmost source uint8_t containing data (1 to 8 bits). */
     int sourceGap    = (8 - ((unsigned)sourceBits & 7)) & 7; /* space on source[sourcePos]. */
-    int bufferRem    = bufferBits & 7; /* occupied bits on buffer[bufferPos]. */
+    int bufferRem    = wp->bufferBits & 7; /* occupied bits on buffer[bufferPos]. */
     int i;
     uint32_t b, carry;
-    uint8_t *buffer       = this->buffer;
-    uint8_t *bitLength    = this->bitLength;
-    int bufferBits   = this->bufferBits;
-    int bufferPos    = this->bufferPos;
+    uint8_t *buffer       = wp->buffer;
+    uint8_t *bitLength    = wp->bitLength;
+    int bufferBits   = wp->bufferBits;
+    int bufferPos    = wp->bufferPos;
 
     /*
      * tally the length of the added data:
@@ -1678,10 +1679,10 @@ void whirlpool_add(struct whirlpool *wp, const unsigned char * const source, uns
 void whirlpool_finalize(struct whirlpool *wp, unsigned char * const result)
 {
     int i;
-    uint8_t *buffer      = this->buffer;
-    uint8_t *bitLength   = this->bitLength;
-    int bufferBits  = this->bufferBits;
-    int bufferPos   = this->bufferPos;
+    uint8_t *buffer      = wp->buffer;
+    uint8_t *bitLength   = wp->bitLength;
+    int bufferBits  = wp->bufferBits;
+    int bufferPos   = wp->bufferPos;
     uint8_t *digest      = result;
 
     /*
@@ -1725,23 +1726,18 @@ void whirlpool_finalize(struct whirlpool *wp, unsigned char * const result)
      * return the completed message digest:
      */
     for (i = 0; i < WHIRLPOOL_DIGESTBYTES/8; i++) {
-        digest[0] = (uint8_t)(hash[i] >> 56);
-        digest[1] = (uint8_t)(hash[i] >> 48);
-        digest[2] = (uint8_t)(hash[i] >> 40);
-        digest[3] = (uint8_t)(hash[i] >> 32);
-        digest[4] = (uint8_t)(hash[i] >> 24);
-        digest[5] = (uint8_t)(hash[i] >> 16);
-        digest[6] = (uint8_t)(hash[i] >>  8);
-        digest[7] = (uint8_t)(hash[i]      );
+        digest[0] = (uint8_t)(wp->hash[i] >> 56);
+        digest[1] = (uint8_t)(wp->hash[i] >> 48);
+        digest[2] = (uint8_t)(wp->hash[i] >> 40);
+        digest[3] = (uint8_t)(wp->hash[i] >> 32);
+        digest[4] = (uint8_t)(wp->hash[i] >> 24);
+        digest[5] = (uint8_t)(wp->hash[i] >> 16);
+        digest[6] = (uint8_t)(wp->hash[i] >>  8);
+        digest[7] = (uint8_t)(wp->hash[i]      );
         digest += 8;
     }
 
     bufferBits   = bufferBits;
     bufferPos    = bufferPos;
-}
-
-
-void whirlpool_destroy(struct whirlpool *wp)
-{
 }
 
