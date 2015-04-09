@@ -26,10 +26,6 @@
 #define SKIP_PERMUT 1
 #endif
 
-#ifndef BUFSIZE
-#define BUFSIZE 0x400
-#endif
-
 #if DEBUG
 #define QBITCOPY(b1,o1,m1,b2,o2,m2) qbitcopy(b1,o1,m1,b2,o2,m2)
 #else
@@ -129,11 +125,53 @@ struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt)
 }
 
 
+struct pengpipe *genpengpipe(unsigned blksize, unsigned rounds, unsigned variations, struct mersennetwister *mt)
+{
+    int i,j;
+    struct pengpipe *res = MALLOC(sizeof(struct pengpipe));
+    
+    res->rounds = rounds;
+    res->variations = variations;
+    res->mtx = MALLOC(variations * sizeof(struct pengset *));
+    for(i=0; i<variations; i++)
+    {
+        res->mtx[i] = MALLOC(rounds * sizeof(struct pengset));
+    }
+    for(i=0; i<variations; i++)
+    {
+        for(j=0; j<rounds; j++)
+        {
+            res->mtx[i][j] = genpengset(blksize, mt);
+        }
+    }
+}
+
+
 void destroypengset(struct pengset *p)
 {
     FREE(p->perm1);
     FREE(p->perm2);
     FREE(p->mask);
+    FREE(p);
+}
+
+
+void destroypengpipe(struct pengpipe *p)
+{
+    int i,j;
+    
+    for(i=0; i<variations; i++)
+    {
+        for(j=0; j<rounds; j++)
+        {
+            destroypengset(p->mtx[i][j]);
+        }
+    }
+    for(i=0; i<variations; i++)
+    {
+        FREE(p->mtx[i]);
+    }
+    FREE(p->mtx)
     FREE(p);
 }
 
@@ -178,5 +216,21 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
 #else
         memcpy(buf2, tmpbuf, blksize);
 #endif
+    }
+}
+
+
+void execpengpipe(struct pengset *p, const unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt)
+{
+    int i,j;
+    
+    for(i=0; i<variations; i++)
+    {
+        for(j=0; j<rounds; j++)
+        {
+            execpengset(p->mtx[i][j], buf1, tmpbuf, buf2, encrypt);
+            /* TODO copy buf2 back to buf1 */
+        }
+        /* TODO promote buffer */
     }
 }

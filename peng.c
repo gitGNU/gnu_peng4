@@ -12,6 +12,18 @@
 #include "peng_glob.h"
 
 
+
+
+
+/* attention ! passphrase will be erased ! */
+void peng_cmd_prep(unsigned blksize, unsigned rounds, unsigned variations, char *passphrase)
+{
+}
+
+
+void peng_
+
+
 int main(int argc, char **argv)
 {
     int h1, h2, i, j, num=0, eflag=0;
