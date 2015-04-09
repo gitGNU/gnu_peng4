@@ -18,6 +18,7 @@
 
 #define DORKY 1
 #define SKIP_XOR 1
+#define SKIP_PERMUT 1
 
 #define BUFSIZE 0x400
 
@@ -126,10 +127,14 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
     
     if(encrypt)
     {
+#if !SKIP_PERMUT
         for(i=0; i<blksize8; i++)
         {
             QBITCOPY(buf1, p->perm1[i], buf2, p->perm2[i]);
         }
+#else
+        memcpy(buf2, buf1, blksize8);
+#endif
 #if !SKIP_XOR
         for(i=0; i<blksize; i++)
         {
@@ -146,10 +151,14 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
             QXOR(i, tmpbuf, p->mask);
         }
 #endif
+#if !SKIP_PERMUT
         for(i=0; i<blksize8; i++)
         {
             QBITCOPY(tmpbuf, p->perm2[i], buf2, p->perm1[i]);
         }
+#else
+        memcpy(buf2, buf1, blksize8);
+#endif
     }
 }
 
