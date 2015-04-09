@@ -145,6 +145,7 @@ long long genrand64_int63(void)
 {
     return (long long)(genrand64_int64() >> 1);
 }
+*/
 
 /* generates a random number on [0,1]-real-interval */
 /*
