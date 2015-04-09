@@ -14,5 +14,5 @@ struct pengpipe
 
 
 
-struct pengset *genpengset(unsigned blksize);
+struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt);
 void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt);

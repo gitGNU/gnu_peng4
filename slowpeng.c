@@ -9,9 +9,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <alloca.h>
 #include <string.h>
 
-#include "mt19937-64.h"
+#include "mt19937ar.h"
 #include "slowpeng.h"
 
 
@@ -26,7 +27,7 @@
 #define QXOR(i, buf, msk) buf[i] ^= msk[i];
 
 #define MALLOC chkmalloc
-
+#define MALLOCA alloca
 
 
 static unsigned char q2c(unsigned long long x)
@@ -56,12 +57,12 @@ static void qbitcopy(const unsigned char *buf1, unsigned off1, unsigned char *bu
 }
 
 
-struct pengset *genpengset(unsigned blksize)
+struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt)
 {
     unsigned blksize8 = blksize*8;
     struct pengset *res = MALLOC(sizeof(struct pengset));
-    char *tempflg1 = MALLOC(blksize8);
-    char *tempflg2 = MALLOC(blksize8);
+    char *tempflg1 = MALLOCA(blksize8);
+    char *tempflg2 = MALLOCA(blksize8);
     int i,j,k;
     
     memset(tempflg1, 0, blksize8);
@@ -74,20 +75,20 @@ struct pengset *genpengset(unsigned blksize)
     for(i=0; i<blksize8; i++)
     {
 #if DORKY
-        j = genrand64_int64() % blksize8;
+        j = mersennetwister_genrand_int32(mt) % blksize8;
         /* this is dorky, but it speeds things up a lot */
         while(tempflg1[j])
             j = (j+1)%blksize8;
-        k = genrand64_int64() % blksize8;
+        k = mersennetwister_genrand_int32(mt) % blksize8;
         /* this is dorky, but it speeds things up a lot */
         while(tempflg2[k])
             k = (k+1)%blksize8;
 #else
         do
-            j = genrand64_int64() % blksize8;
+            j = mersennetwister_genrand_int32(mt) % blksize8;
         while(tempflg1[j]);
         do
-            k = genrand64_int64() % blksize8;
+            k = mersennetwister_genrand_int32(mt) % blksize8;
         while(tempflg2[k]);
 #endif
         tempflg1[j] = 1;
@@ -95,11 +96,13 @@ struct pengset *genpengset(unsigned blksize)
         res->perm1[i] = j;
         res->perm2[i] = k;
     }
+    /*
     free(tempflg1);
     free(tempflg2);
+    */
     for(i=0; i<blksize; i++)
     {
-        res->mask[i] = q2c(genrand64_int64());
+        res->mask[i] = q2c(mersennetwister_genrand_int32(mt));
     }
     
     return res;
@@ -158,6 +161,7 @@ int main(int argc, char **argv)
     char *buf2 = MALLOC(BUFSIZE);
     char *buf3 = MALLOC(BUFSIZE);
     struct pengset *ps;
+    struct mersennetwister mt;
     
     if(argc<5)
     {
@@ -167,15 +171,15 @@ int main(int argc, char **argv)
     
     i = strlen(argv[3]);
     memset(buf1, 0, BUFSIZE);
-    strncpy(buf1, argv[3], (i>BUFSIZE)?(BUFSIZE):i);
-    init_genrand64(*(unsigned long long *)buf1);
+    strncpy(buf1, argv[3], j=(i>BUFSIZE)?(BUFSIZE):i);
+    mersennetwister_init_by_array(&mt, (unsigned long *)buf1, (j+3)/4);   /* TODO: fix byte order */
     memset(buf1, 0, BUFSIZE);
 
     eflag = !strcmp(argv[4], "e");
     
     printf("%s -%c-> %s\n", argv[1], eflag?'e':'d', argv[2]);
     
-    ps = genpengset(BUFSIZE);
+    ps = genpengset(BUFSIZE, &mt);
     
     h1 = open(argv[1], O_RDONLY);
     if(h1<0)
