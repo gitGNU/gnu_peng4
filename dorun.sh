@@ -11,7 +11,7 @@ gentestdata()
 #ulimit -c unlimited
 set -e
 
-PROXY=/usr/bin/time
+PROXY=
 
 PARM=32760,19,19
 V=-vvv

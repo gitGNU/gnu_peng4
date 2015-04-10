@@ -4,4 +4,7 @@
 #define FREEA(x)
 
 
+extern int verbosity;
+
+
 void *chkmalloc(unsigned x);

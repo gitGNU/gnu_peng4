@@ -15,10 +15,13 @@
 #include "slowpeng.h"
 
 
-const char *peng_version = "4.01.000.004"; /* CHANGEME */
+const char *peng_version = "4.01.000.005"; /* CHANGEME */
 
 
 #define MAXFNLEN 1024
+
+
+/* global */ int verbosity = 0;
 
 
 struct peng_cmd_environment
@@ -76,11 +79,18 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         close(h1);
         return -1;
     }
-    printf("%30s   -%c->    %-30s\n", infn, pce->eflag ? 'e':'d', outfn);
+    if(verbosity>0)
+    {
+        printf("%30s   -%c->    %-30s\n", infn, pce->eflag ? 'e':'d', outfn);
+        fflush(stdout);
+    }
     for(;;)
     {
-        printf("block #%u\r", ++num);
-        fflush(stdout);
+        if(verbosity>1)
+        {
+            printf("block #%u\r", ++num);
+            fflush(stdout);
+        }
         
         memset(pce->buf1, 0, pce->blksize);
         i = read(h1, pce->buf1, pce->blksize);
@@ -184,7 +194,7 @@ int main(int argc, char **argv)
     unsigned *binparm;
     unsigned blksize, rounds, variations;
     struct peng_cmd_environment mypce;
-    char *origfn, infn[MAXFNLEN], outfn[MAXFNLEN];
+    char *origfn, infn[MAXFNLEN], outfn[MAXFNLEN], *passphrase=NULL;
 
     if(argc<=1)
     {
@@ -194,7 +204,7 @@ int main(int argc, char **argv)
     /* GNU: */
     /* + means: parse POSIXLY_CORRECT, stopping with the first non-option */
     /* - means: give opt==1 for any non-option parameter */
-    while((opt = getopt(argc, argv, "+hVO:drRn")) != -1)
+    while((opt = getopt(argc, argv, "+hVO:drRnvP:")) != -1)
     {
         switch(opt) 
         {
@@ -217,6 +227,19 @@ int main(int argc, char **argv)
             case 'V':
                 printversion();
                 return 0;
+            case 'v':
+                verbosity++;
+                break;
+            case 'P':
+                passphrase = strdup(optarg);
+                if(!passphrase)
+                {
+                    fputs("out of memory\n", stderr);
+                    abort();
+                }
+                break;
+            case 1:
+                abort();   /* there shouldn't be unhandled parameters here */
             case 'h':
                 /* no break */
             default:  /* '?' */
@@ -227,7 +250,9 @@ int main(int argc, char **argv)
                       "\t\t-d\t\tdecrypt\n"
                       "\t\t-r\t\trename input file to infile.bak\n"
                       "\t\t-R\t\treplace input file (dangerous!)\n"
-                      "\t\t-n\t\tname output file as infile.{dec|enc} (default)\n", stdout);
+                      "\t\t-n\t\tname output file as infile.{dec|enc} (default)\n"
+                      "\t\t-v\t\tincrease verbosity\n"
+                      "\t\t-P passphrase\n", stdout);
                 return 1;
         }
     }
@@ -249,7 +274,10 @@ int main(int argc, char **argv)
     variations = binparm[3];
     FREE(binparm);
     
-    peng_cmd_prep(&mypce, blksize, rounds, variations, getpass("PENG Password: "), eflag);
+    if(!passphrase)
+        passphrase = getpass("PENG Password: ");
+    
+    peng_cmd_prep(&mypce, blksize, rounds, variations, passphrase, eflag);
     
     for(i=optind; i<argc; i++)
     {

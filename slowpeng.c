@@ -143,6 +143,11 @@ struct pengpipe *genpengpipe(unsigned blksize, unsigned rounds, unsigned variati
     {
         for(j=0; j<rounds; j++)
         {
+            if(verbosity>0)
+            {
+                printf("generating variation=%d, round=%d\n", i, j);
+                fflush(stdout);
+            }
             res->mtx[i][j] = genpengset(blksize, mt);
         }
     }
