@@ -1,6 +1,6 @@
-DEFS = -DDORKY=0 -DSKIP_XOR=0 -DSKIP_PERMUT=0 -DDEBUG=0
+DEFS = -DDORKY=1 -DSKIP_XOR=0 -DSKIP_PERMUT=0 -DDEBUG=0 -DBETA=1 -DALPHA=1
 
-CFLAGS = -O2 -Wall -Wno-pointer-sign -std=c90 -ggdb
+CFLAGS = -O2 -Wall -Wno-pointer-sign -std=c90 -ggdb -D_GNU_SOURCE
 
 SOURCES= slowpeng.c whirlpool.c mt19937ar.c peng.c peng_misc.c
 

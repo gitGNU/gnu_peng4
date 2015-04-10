@@ -15,6 +15,12 @@
 #include "slowpeng.h"
 
 
+const char *peng_version = "4.01.000.002"; # CHANGEME
+
+
+#define MAXFNLEN 1024
+
+
 struct peng_cmd_environment
 {
     struct pengpipe *pp;
@@ -94,7 +100,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         memset(pce->buf2, 0, pce->blksize);
         memset(pce->buf3, 0, pce->blksize);
         /* execpengset(ps, buf1, buf2, buf3, eflag); */
-        execpengpipe(&pce->pp, pce->buf1, pce->buf2, pce->buf3, pce->eflag);
+        execpengpipe(pce->pp, pce->buf1, pce->buf2, pce->buf3, pce->eflag);
         
         j = write(h2, pce->buf3, pce->eflag?(pce->blksize):i);
         if(j<0)
@@ -115,14 +121,184 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
 
 void peng_cmd_unprep(struct peng_cmd_environment *pce)
 {
-    destroypengset(pce->pp);
+    destroypengpipe(pce->pp);
     FREE(pce->buf1);
     FREE(pce->buf2);
     FREE(pce->buf3);
 }
 
 
+void printversion(void)
+{
+#if DORKY || SKIP_XOR || SKIP_PERMUT
+    puts("THIS IS A TESTING VERSION //UNFIT\\\\ FOR PRODUCTION USE!");
+    puts("If you are not in the inner circle of testers, please do not use this\n"
+         "piece of software.");
+#elif ALPHA
+    puts("This is a ALPHA testing version not meant for production use.");
+    puts("If you are not in the inner circle of testers, please do not use this\n"
+         "piece of software.");
+#elif BETA
+    puts("This is a BETA testing version not meant for production use.");
+#elif DEBUG
+    puts("This is a version with DEBUG compiled in.  Do not expect optimum performance.");
+#endif
+    printf("PENG Version %s, (C)1998-2015 by Klaus-J. Wolf\n", peng_version);
+}
+
+
+/* returns array of numbers, first being the count */
+unsigned *parseints(char *s)
+{
+    int i0=0,i,j=1,n=1;
+    unsigned *res;
+    
+    for(i=0; s[i]; i++)
+        if(s[i]==',')
+            n++;
+    res = MALLOC(sizeof(unsigned)*(n+1));
+    res[0] = n;
+    for(i=0; s[i]; i++)
+    {
+        if(s[i]==',')
+        {
+            s[i]=0;
+            res[j++]=atoi(s+i0);
+            s[i]=',';
+            i0=i+1;
+        }
+    }
+    res[j]=atoi(s+i0);
+    return res;
+}
+
+
 int main(int argc, char **argv)
 {
+    int i,r;
+    int opt;
+    char *parm = "1024,1,1";
+    int eflag = 1;
+    int delflag;
+    char fnmode = 'n';
+    unsigned *binparm;
+    unsigned blksize, rounds, variations;
+    struct peng_cmd_environment mypce;
+    char *origfn, infn[MAXFNLEN], outfn[MAXFNLEN];
+
+    if(argc<=1)
+    {
+        fprintf(stderr, "use option -h for help\n");
+        return 9;
+    }
+    /* GNU: */
+    /* + means: parse POSIXLY_CORRECT, stopping with the first non-option */
+    /* - means: give opt==1 for any non-option parameter */
+    while((opt = getopt(argc, argv, "+hVO:drRn")) != -1)
+    {
+        switch(opt) 
+        {
+            case 'O':
+                parm = strdup(optarg);
+                if(!parm)
+                {
+                    fputs("out of memory\n", stderr);
+                    abort();
+                }
+                break;
+            case 'r':
+            case 'R':
+            case 'n':
+                fnmode = opt;
+                break;
+            case 'd':
+                eflag = 0;
+                break;
+            case 'V':
+                printversion();
+                return 0;
+            case 'h':
+                /* no break */
+            default:  /* '?' */
+                fprintf(stderr, "usage: %s [option] infile...\n", argv[0]);
+                fputs("options:\t-h\t\tthis help\n"
+                      "\t\t-V\t\tdisplay version information\n"
+                      "\t\t-O blocksize,rounds,variations\n"
+                      "\t\t-d\t\tdecrypt\n"
+                      "\t\t-r\t\trename input file to infile.bak\n"
+                      "\t\t-R\t\treplace input file (dangerous!)\n"
+                      "\t\t-n\t\tname output file as infile.{dec|enc} (default)\n", stdout);
+                return 1;
+        }
+    }
+    if(optind>=argc)
+    {
+        fprintf(stderr, "expected argument after options\n");
+        return 9;
+    }
+    
+    binparm = parseints(parm);
+    
+    if(binparm[0]!=3)
+    {
+        fprintf(stderr, "expected -O parameter options as triple numeric separated by commas\n");
+        return 9;
+    }
+    blksize = binparm[1];
+    rounds = binparm[2];
+    variations = binparm[3];
+    FREE(binparm);
+    
+    peng_cmd_prep(&mypce, blksize, rounds, variations, getpass("PENG Password: "), eflag);
+    
+    for(i=optind; i<argc; i++)
+    {
+        delflag = 0;
+        origfn = argv[i];
+        if(strlen(origfn)>=MAXFNLEN-5)
+        {
+            fputs("filename too long\n", stderr);
+            return 100;
+        }
+        
+        switch(fnmode)
+        {
+            case 'R':
+                /* Unix only: delete the input file, create a new file with the same name */
+                delflag = 1;
+                /* no break */
+            case 'r':
+                /* first, rename input file to .bak, then create a new file with the original name */
+                strcpy(outfn, origfn);
+                strcpy(infn, origfn);
+                strcat(infn, ".bak");
+                r = rename(outfn, infn);
+                if(r<0)
+                {
+                    perror(outfn);
+                    return 99;
+                }
+                break;
+            case 'n':
+                /* output file is .enc or .dec depending on eflag */
+                strcpy(infn, origfn);
+                strcpy(outfn, origfn);
+                strcat(outfn, eflag?".enc":".dec");
+                break;
+            default:
+                abort();
+        }
+        r = peng_cmd_process(&mypce, infn, outfn);
+        if(r<0)
+        {
+            /* perror(argv[i]); <<< this is done in the process */
+            return 19;
+        }
+        if(delflag)
+            remove(infn);
+    }
+
+    peng_cmd_unprep(&mypce);
+    
     return 0;
 }

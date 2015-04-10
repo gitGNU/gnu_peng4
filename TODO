@@ -8,5 +8,6 @@
  * password not on cmd line
  * byte alignment
 
+OPTIMIZATION
  * threads
  * bit ordering
