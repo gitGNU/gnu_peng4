@@ -1,0 +1,23 @@
+PENG4 ("Permutation Engine 4") is an implementation of an encryption algorithm 
+based on long-distance bit permutations. It is still experimental. Written in C, 
+it is suprisingly fast on modern computers. Lower performance is partially 
+intended because of more difficult brute force attacks. The project was started 
+in 1998, and in generation 4 the main objective was to avoid manual 
+optimizations, since, surprisingly, bitpacking and access ordering have made 
+things worse. The algorithm and the tool is intended for top secret material, 
+albeit its implementation is experimental and may be faulty or too simplistic in 
+some point of view. Caveat utilitor!
+
+MT19937
+BSD License
+http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
+
+Whirlpool Hash
+Public Domain
+https://www.cosic.esat.kuleuven.ac.be/nessie/workshop/submissions/whirlpool.zip
+
+Recommended tools:
+
+ENT (Random)
+Public Domain
+http://www.fourmilab.ch/random/

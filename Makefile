@@ -1,4 +1,4 @@
-DEFS = -DDORKY=1 -DSKIP_XOR=1 -DSKIP_PERMUT=0 -DDEBUG=0 -DBETA=1 -DALPHA=1
+DEFS = -DDORKY=0 -DSKIP_XOR=0 -DSKIP_PERMUT=0 -DDEBUG=0 -DBETA=1 -DALPHA=1
 
 CFLAGS = -O2 -Wall -Wno-pointer-sign -std=c90 -ggdb -D_GNU_SOURCE
 
@@ -27,7 +27,8 @@ test:
 ##############################################################################
 
 ci: clean
-	git add *.c *.h Makefile *.sh TODO
+	./updver.py
+	git add *.c *.h Makefile *.sh TODO README LICENSE *.py
 	git ci
 
 keywords:

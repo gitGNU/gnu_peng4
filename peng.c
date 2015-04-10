@@ -15,7 +15,7 @@
 #include "slowpeng.h"
 
 
-const char *peng_version = "4.01.000.006"; /* CHANGEME */
+const char *peng_version = "4.01.000.007"; /* CHANGEME */
 
 
 #define MAXFNLEN 1024
@@ -210,7 +210,7 @@ int main(int argc, char **argv)
         switch(opt) 
         {
             case 'O':
-                parm = strdup(optarg);
+                parm = strdup(optarg);  /* TODO leak */
                 if(!parm)
                 {
                     fputs("out of memory\n", stderr);
@@ -232,7 +232,7 @@ int main(int argc, char **argv)
                 verbosity++;
                 break;
             case 'P':
-                passphrase = strdup(optarg);
+                passphrase = strdup(optarg);  /* TODO leak */
                 if(!passphrase)
                 {
                     fputs("out of memory\n", stderr);

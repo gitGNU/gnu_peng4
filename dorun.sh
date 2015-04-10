@@ -25,3 +25,5 @@ cp ${TESTFILE}.enc ${TESTFILE}_dec_2
 cp ${TESTFILE}.enc ${TESTFILE}_dec_1
 $PROXY ./peng -R -d -O $PARM $V -P blablaBLOEBLOE ${TESTFILE}_dec_1
 $PROXY ./peng -R -d -O $PARM $V -P blablaBLOEBLuE ${TESTFILE}_dec_2
+
+md5sum ${TESTFILE}*
