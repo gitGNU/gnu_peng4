@@ -13,7 +13,7 @@ set -e
 
 PROXY=valgrind
 
-PARM=32760,19,19
+PARM=1024,1,1
 V=-vvv
 
 TESTFILE=testfile

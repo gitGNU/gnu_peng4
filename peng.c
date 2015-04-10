@@ -15,7 +15,7 @@
 #include "slowpeng.h"
 
 
-const char *peng_version = "4.01.000.005"; /* CHANGEME */
+const char *peng_version = "4.01.000.006"; /* CHANGEME */
 
 
 #define MAXFNLEN 1024
@@ -29,7 +29,7 @@ struct peng_cmd_environment
     struct pengpipe *pp;
     struct mersennetwister mt;
     unsigned char *buf1, *buf2, *buf3;
-    unsigned blksize;
+    unsigned blksize, bufsize;
     int eflag;
 };
 
@@ -48,11 +48,12 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned 
     
     pce->pp = genpengpipe(blksize, rounds, variations, &pce->mt);
     pce->blksize = blksize;    /* again, this is the third time this value is stored */
+    pce->bufsize = getbufsize(pce->pp);
     pce->eflag = eflag?1:0;
     
-    pce->buf1 = MALLOC(blksize);
-    pce->buf2 = MALLOC(blksize);
-    pce->buf3 = MALLOC(blksize);
+    pce->buf1 = MALLOC(pce->bufsize);
+    pce->buf2 = MALLOC(pce->bufsize);
+    pce->buf3 = MALLOC(pce->bufsize);
     
     memset(passphrase, 0, strlen(passphrase));
     memset(&wp, 0, sizeof wp);
@@ -92,8 +93,8 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
             fflush(stdout);
         }
         
-        memset(pce->buf1, 0, pce->blksize);
-        i = read(h1, pce->buf1, pce->blksize);
+        memset(pce->buf1, 0, pce->bufsize);
+        i = read(h1, pce->buf1, pce->bufsize);
         if(i<0)
         {
             perror(infn);
@@ -102,17 +103,17 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         if(i<=0)
             break;
         
-        if(!pce->eflag && i<pce->blksize)
+        if(!pce->eflag && i<pce->bufsize)
         {
             fputs("warning: expected a full block while reading for decryption\n", stderr);
         }
         
-        memset(pce->buf2, 0, pce->blksize);
-        memset(pce->buf3, 0, pce->blksize);
+        memset(pce->buf2, 0, pce->bufsize);
+        memset(pce->buf3, 0, pce->bufsize);
         /* execpengset(ps, buf1, buf2, buf3, eflag); */
         execpengpipe(pce->pp, pce->buf1, pce->buf2, pce->buf3, pce->eflag);
         
-        j = write(h2, pce->buf3, pce->eflag?(pce->blksize):i);
+        j = write(h2, pce->buf3, pce->eflag?(pce->bufsize):i);
         if(j<0)
         {
             perror(outfn);
