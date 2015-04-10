@@ -1,5 +1,5 @@
 /*
- * whirlpool.hh
+ * whirlpool.h
  */
 
 
@@ -21,10 +21,12 @@ struct whirlpool
     int      bufferBits;             /* current number of bits on the buffer */
     int      bufferPos;              /* current (possibly incomplete) byte slot on the buffer */
     uint64_t hash[WHIRLPOOL_DIGESTBYTES/8];    /* the hashing state */
+    char     hexhash[WHIRLPOOL_DIGESTBYTES*2+1];
 };
 
 
-void whirlpool_processbuffer(struct whirlpool *wp);
+/* void whirlpool_processbuffer(struct whirlpool *wp); */
 void whirlpool_init(struct whirlpool *wp);
 void whirlpool_add(struct whirlpool *wp, const unsigned char * const source, unsigned long sourceBits);
 void whirlpool_finalize(struct whirlpool *wp, unsigned char * const result);
+const char *whirlpool_hexhash(struct whirlpool *wp);

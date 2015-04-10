@@ -14,6 +14,7 @@
 
 #include "mt19937ar.h"
 #include "slowpeng.h"
+#include "peng_glob.h"
 
 
 #ifndef DORKY
@@ -130,12 +131,13 @@ struct pengpipe *genpengpipe(unsigned blksize, unsigned rounds, unsigned variati
     int i,j;
     struct pengpipe *res = MALLOC(sizeof(struct pengpipe));
     
+    res->blksize = blksize;
     res->rounds = rounds;
     res->variations = variations;
-    res->mtx = MALLOC(variations * sizeof(struct pengset *));
+    res->mtx = MALLOC(variations * sizeof(struct pengset **));
     for(i=0; i<variations; i++)
     {
-        res->mtx[i] = MALLOC(rounds * sizeof(struct pengset));
+        res->mtx[i] = MALLOC(rounds * sizeof(struct pengset *));
     }
     for(i=0; i<variations; i++)
     {
@@ -144,6 +146,7 @@ struct pengpipe *genpengpipe(unsigned blksize, unsigned rounds, unsigned variati
             res->mtx[i][j] = genpengset(blksize, mt);
         }
     }
+    return res;
 }
 
 
@@ -160,18 +163,18 @@ void destroypengpipe(struct pengpipe *p)
 {
     int i,j;
     
-    for(i=0; i<variations; i++)
+    for(i=0; i<p->variations; i++)
     {
-        for(j=0; j<rounds; j++)
+        for(j=0; j<p->rounds; j++)
         {
             destroypengset(p->mtx[i][j]);
         }
     }
-    for(i=0; i<variations; i++)
+    for(i=0; i<p->variations; i++)
     {
         FREE(p->mtx[i]);
     }
-    FREE(p->mtx)
+    FREE(p->mtx);
     FREE(p);
 }
 
@@ -220,17 +223,28 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
 }
 
 
-void execpengpipe(struct pengset *p, const unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt)
+void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt)
 {
     int i,j;
+    unsigned off;
     
-    for(i=0; i<variations; i++)
+    for(i=0; i<p->variations; i++)
     {
-        for(j=0; j<rounds; j++)
+        off = i*p->blksize;
+        for(j=0; j<p->rounds; j++)
         {
-            execpengset(p->mtx[i][j], buf1, tmpbuf, buf2, encrypt);
-            /* TODO copy buf2 back to buf1 */
+            execpengset(p->mtx[i][j], buf1+off, tmpbuf, buf2+off, encrypt);
+            /* copy buf2 back to buf1 */
+            if(j<p->rounds-1)
+            {
+                memcpy(buf1+off, buf2+off, p->blksize);
+            }
         }
-        /* TODO promote buffer */
     }
+}
+
+
+unsigned long getbufsize(struct pengpipe *p)
+{
+    return (unsigned long)p->blksize * p->variations;
 }

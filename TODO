@@ -7,3 +7,6 @@
  * make block size configurable
  * password not on cmd line
  * byte alignment
+
+ * threads
+ * bit ordering

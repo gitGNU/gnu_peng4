@@ -1,17 +1,18 @@
 struct pengset
 {
-    unsigned         blksize;
-    unsigned short  *perm1;
-    unsigned short  *perm2;
-    unsigned char   *mask;
+    unsigned            blksize;
+    unsigned short     *perm1;
+    unsigned short     *perm2;
+    unsigned char      *mask;
 };
 
 
 struct pengpipe
 {
-    unsigned rounds;       /* y dimension */
-    unsigned variations;   /* x dimension */
-    struct pengset **mtx;     /* 2d matrix */
+    unsigned            blksize;
+    unsigned            rounds;       /* y dimension */
+    unsigned            variations;   /* x dimension */
+    struct pengset   ***mtx;          /* 2d matrix */
 };
 
 
@@ -21,4 +22,5 @@ struct pengpipe *genpengpipe(unsigned blksize, unsigned rounds, unsigned variati
 void destroypengset(struct pengset *p);
 void destroypengpipe(struct pengpipe *p);
 void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt);
-void execpengpipe(struct pengset *p, const unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt);
+void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt);
+unsigned long getbufsize(struct pengpipe *p);

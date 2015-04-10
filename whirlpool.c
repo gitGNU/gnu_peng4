@@ -1,7 +1,7 @@
 /**
  * The Whirlpool hashing function.
  * 
- * whirlpool.cc
+ * whirlpool.c
  */
 
 #include <stdio.h>
@@ -1188,7 +1188,7 @@ static const uint64_t rc[R + 1] = {
 /**
  * The core Whirlpool transform.
  */
-void whirlpool_processbuffer(struct whirlpool *wp)
+static void whirlpool_processbuffer(struct whirlpool *wp)
 {
     int i, r;
     uint64_t K[8];        /* the round key */
@@ -1605,7 +1605,7 @@ void whirlpool_add(struct whirlpool *wp, const unsigned char * const source, uns
             /*
              * process data block:
              */
-            processBuffer();
+            whirlpool_processbuffer(wp);
             /*
              * reset buffer:
              */
@@ -1658,7 +1658,7 @@ void whirlpool_add(struct whirlpool *wp, const unsigned char * const source, uns
             /*
              * process data block:
              */
-            processBuffer();
+            whirlpool_processbuffer(wp);
             /*
              * reset buffer:
              */
@@ -1702,7 +1702,7 @@ void whirlpool_finalize(struct whirlpool *wp, unsigned char * const result)
         /*
          * process data block:
          */
-        processBuffer();
+        whirlpool_processbuffer(wp);
         /*
          * reset buffer:
          */
@@ -1720,24 +1720,62 @@ void whirlpool_finalize(struct whirlpool *wp, unsigned char * const result)
     /*
      * process data block:
      */
-    processBuffer();
+    whirlpool_processbuffer(wp);
 
     /*
      * return the completed message digest:
      */
-    for (i = 0; i < WHIRLPOOL_DIGESTBYTES/8; i++) {
-        digest[0] = (uint8_t)(wp->hash[i] >> 56);
-        digest[1] = (uint8_t)(wp->hash[i] >> 48);
-        digest[2] = (uint8_t)(wp->hash[i] >> 40);
-        digest[3] = (uint8_t)(wp->hash[i] >> 32);
-        digest[4] = (uint8_t)(wp->hash[i] >> 24);
-        digest[5] = (uint8_t)(wp->hash[i] >> 16);
-        digest[6] = (uint8_t)(wp->hash[i] >>  8);
-        digest[7] = (uint8_t)(wp->hash[i]      );
-        digest += 8;
-    }
+    if(digest)
+        for (i = 0; i < WHIRLPOOL_DIGESTBYTES/8; i++) {
+            digest[0] = (uint8_t)(wp->hash[i] >> 56);
+            digest[1] = (uint8_t)(wp->hash[i] >> 48);
+            digest[2] = (uint8_t)(wp->hash[i] >> 40);
+            digest[3] = (uint8_t)(wp->hash[i] >> 32);
+            digest[4] = (uint8_t)(wp->hash[i] >> 24);
+            digest[5] = (uint8_t)(wp->hash[i] >> 16);
+            digest[6] = (uint8_t)(wp->hash[i] >>  8);
+            digest[7] = (uint8_t)(wp->hash[i]      );
+            digest += 8;
+        }
 
     bufferBits   = bufferBits;
     bufferPos    = bufferPos;
 }
 
+
+
+void tohex(unsigned char *p, uint16_t x)
+{
+    register uint16_t a = ((x>>4)&0xf), b = (x&0xf);
+    
+    a+='0';
+    b+='0';
+    if(a>'9')
+        a+='a'-'0'-10;
+    if(b>'9')
+        b+='a'-'0'-10;
+    p[0]=a;
+    p[1]=b;
+}
+
+
+const char *whirlpool_hexhash(struct whirlpool *wp)
+{
+    int i, i9 = WHIRLPOOL_DIGESTBYTES/8;
+    uint64_t v;
+    
+    for(i=0; i<i9; i++)
+    {
+        v = wp->hash[i];
+        tohex(wp->hexhash + (i*2*8)    ,  (uint16_t) (v>>56));
+        tohex(wp->hexhash + (i*2*8) + 2,  (uint16_t) (v>>48));
+        tohex(wp->hexhash + (i*2*8) + 4,  (uint16_t) (v>>40));
+        tohex(wp->hexhash + (i*2*8) + 6,  (uint16_t) (v>>32));
+        tohex(wp->hexhash + (i*2*8) + 8,  (uint16_t) (v>>24));
+        tohex(wp->hexhash + (i*2*8) + 10, (uint16_t) (v>>16));
+        tohex(wp->hexhash + (i*2*8) + 12, (uint16_t) (v>>8));
+        tohex(wp->hexhash + (i*2*8) + 14, (uint16_t) (v));
+    }
+    wp->hexhash[WHIRLPOOL_DIGESTBYTES*2]=0;
+    return wp->hexhash;
+}
