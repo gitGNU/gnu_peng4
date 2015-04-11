@@ -15,7 +15,7 @@
 #include "slowpeng.h"
 
 
-const char *peng_version = "4.01.00.0008"; /* CHANGEME */
+const char *peng_version = "4.01.00.009"; /* CHANGEME */
 
 
 #define MAXFNLEN 1024

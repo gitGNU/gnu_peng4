@@ -38,3 +38,7 @@ push:
 	git push -u origin master
 
 ##############################################################################
+
+tarball:
+	tar -cjf peng4-$(shell ./getver.sh).tar.bz2 *
+
