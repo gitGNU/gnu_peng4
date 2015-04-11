@@ -13,7 +13,7 @@ set -e
 
 PROXY=
 
-PARM=32760,19,19
+PARM=32760,3,44
 V=-vvv
 
 TESTFILE=testfile

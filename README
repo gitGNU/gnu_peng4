@@ -21,3 +21,59 @@ Recommended tools:
 ENT (Random)
 Public Domain
 http://www.fourmilab.ch/random/
+
+
+$ ent ur_testfile 
+Entropy = 7.999997 bits per byte.
+
+Optimum compression would reduce the size
+of this 67223520 byte file by 0 percent.
+
+Chi square distribution for 67223520 samples is 237.88, and randomly
+would exceed this value 77.22 percent of the times.
+
+Arithmetic mean value of data bytes is 127.4953 (127.5 = random).
+Monte Carlo value for Pi is 3.141918543 (error 0.01 percent).
+Serial correlation coefficient is 0.000080 (totally uncorrelated = 0.0).
+
+
+$ ent aes_testfile 
+Entropy = 7.999997 bits per byte.
+
+Optimum compression would reduce the size
+of this 67109157 byte file by 0 percent.
+
+Chi square distribution for 67109157 samples is 277.43, and randomly
+would exceed this value 15.99 percent of the times.
+
+Arithmetic mean value of data bytes is 127.4929 (127.5 = random).
+Monte Carlo value for Pi is 3.142242562 (error 0.02 percent).
+Serial correlation coefficient is 0.000083 (totally uncorrelated = 0.0).
+
+
+$ ent testfile.enc 
+Entropy = 7.999876 bits per byte.
+
+Optimum compression would reduce the size
+of this 67747680 byte file by 0 percent.
+
+Chi square distribution for 67747680 samples is 11679.38, and randomly
+would exceed this value less than 0.01 percent of the times.
+
+Arithmetic mean value of data bytes is 127.4532 (127.5 = random).
+Monte Carlo value for Pi is 3.144639757 (error 0.10 percent).
+Serial correlation coefficient is -0.000637 (totally uncorrelated = 0.0).
+
+
+$ ent ~/1mbtest-entropy.bin 
+Entropy = 7.999816 bits per byte.
+
+Optimum compression would reduce the size
+of this 1048576 byte file by 0 percent.
+
+Chi square distribution for 1048576 samples is 267.66, and randomly
+would exceed this value 28.06 percent of the times.
+
+Arithmetic mean value of data bytes is 127.5992 (127.5 = random).
+Monte Carlo value for Pi is 3.138302377 (error 0.10 percent).
+Serial correlation coefficient is 0.000267 (totally uncorrelated = 0.0).

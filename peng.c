@@ -15,7 +15,7 @@
 #include "slowpeng.h"
 
 
-const char *peng_version = "4.01.000.007"; /* CHANGEME */
+const char *peng_version = "4.01.000.008"; /* CHANGEME */
 
 
 #define MAXFNLEN 1024
@@ -44,6 +44,13 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned 
     whirlpool_add(&wp, (unsigned char *) passphrase, strlen(passphrase)*8);
     whirlpool_finalize(&wp, digest);
 
+    if(verbosity>2)
+    {
+        printf("passphrase = %s\n", passphrase);
+        printf("whirlpool = %s\n", whirlpool_hexhash(&wp));
+        fflush(stdout);
+    }
+    
     mersennetwister_init_by_array(&pce->mt, (unsigned long *)digest, WHIRLPOOL_DIGESTBYTES/4);  /* TODO byte order, packing */
     
     pce->pp = genpengpipe(blksize, rounds, variations, &pce->mt);

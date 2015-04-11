@@ -1622,10 +1622,6 @@ void whirlpool_add(struct whirlpool *wp, const unsigned char * const source, uns
     int bufferRem    = wp->bufferBits & 7; /* occupied bits on buffer[bufferPos]. */
     int i;
     uint32_t b, carry;
-    uint8_t *buffer       = wp->buffer;
-    uint8_t *bitLength    = wp->bitLength;
-    int bufferBits   = wp->bufferBits;
-    int bufferPos    = wp->bufferPos;
 
     /*
      * tally the length of the added data:
@@ -1633,8 +1629,8 @@ void whirlpool_add(struct whirlpool *wp, const unsigned char * const source, uns
     uint64_t value = sourceBits;
 
     for (i = 31, carry = 0; i >= 0 && (carry != 0 || value != LL(0)); i--) {
-        carry += bitLength[i] + ((uint32_t)value & 0xff);
-        bitLength[i] = (uint8_t)carry;
+        carry += wp->bitLength[i] + ((uint32_t)value & 0xff);
+        wp->bitLength[i] = (uint8_t)carry;
         carry >>= 8;
         value >>= 8;
     }
@@ -1653,9 +1649,9 @@ void whirlpool_add(struct whirlpool *wp, const unsigned char * const source, uns
         /*
          * process this byte:
          */
-        buffer[bufferPos++] |= (uint8_t)(b >> bufferRem);
-        bufferBits += 8 - bufferRem; /* bufferBits = 8*bufferPos; */
-        if (bufferBits == WHIRLPOOL_DIGESTBITS)
+        wp->buffer[wp->bufferPos++] |= (uint8_t)(b >> bufferRem);
+        wp->bufferBits += 8 - bufferRem; /* bufferBits = 8*bufferPos; */
+        if (wp->bufferBits == WHIRLPOOL_DIGESTBITS)
         {
             /*
              * process data block:
@@ -1664,10 +1660,10 @@ void whirlpool_add(struct whirlpool *wp, const unsigned char * const source, uns
             /*
              * reset buffer:
              */
-            bufferBits = bufferPos = 0;
+            wp->bufferBits = wp->bufferPos = 0;
         }
-        buffer[bufferPos] = b << (8 - bufferRem);
-        bufferBits += bufferRem;
+        wp->buffer[wp->bufferPos] = b << (8 - bufferRem);
+        wp->bufferBits += bufferRem;
         /*
          * proceed to remaining data:
          */
@@ -1683,7 +1679,7 @@ void whirlpool_add(struct whirlpool *wp, const unsigned char * const source, uns
         /*
          * process the remaining bits:
          */
-        buffer[bufferPos] |= b >> bufferRem;
+        wp->buffer[wp->bufferPos] |= b >> bufferRem;
     }
     else
     {
@@ -1695,20 +1691,20 @@ void whirlpool_add(struct whirlpool *wp, const unsigned char * const source, uns
          * all remaining data fits on buffer[bufferPos],
          * and there still remains some space.
          */
-        bufferBits += sourceBits;
+        wp->bufferBits += sourceBits;
     }
     else
     {
         /*
          * buffer[bufferPos] is full:
          */
-        bufferPos++;
-        bufferBits += 8 - bufferRem; /* bufferBits = 8*bufferPos; */
+        wp->bufferPos++;
+        wp->bufferBits += 8 - bufferRem; /* bufferBits = 8*bufferPos; */
         sourceBits -= 8 - bufferRem;
         /* now 0 <= sourceBits < 8;
          * furthermore, all data (if any is left) is in source[sourcePos].
          */
-        if (bufferBits == WHIRLPOOL_DIGESTBITS)
+        if (wp->bufferBits == WHIRLPOOL_DIGESTBITS)
         {
             /*
              * process data block:
@@ -1717,13 +1713,11 @@ void whirlpool_add(struct whirlpool *wp, const unsigned char * const source, uns
             /*
              * reset buffer:
              */
-            bufferBits = bufferPos = 0;
+            wp->bufferBits = wp->bufferPos = 0;
         }
-        buffer[bufferPos] = b << (8 - bufferRem);
-        bufferBits += (unsigned)sourceBits;
+        wp->buffer[wp->bufferPos] = b << (8 - bufferRem);
+        wp->bufferBits += (unsigned)sourceBits;
     }
-    bufferBits   = bufferBits;
-    bufferPos    = bufferPos;
 }
 
 /**
@@ -1734,25 +1728,21 @@ void whirlpool_add(struct whirlpool *wp, const unsigned char * const source, uns
 void whirlpool_finalize(struct whirlpool *wp, unsigned char * const result)
 {
     int i;
-    uint8_t *buffer      = wp->buffer;
-    uint8_t *bitLength   = wp->bitLength;
-    int bufferBits  = wp->bufferBits;
-    int bufferPos   = wp->bufferPos;
     uint8_t *digest      = result;
 
     /*
      * append a '1'-bit:
      */
-    buffer[bufferPos] |= 0x80U >> (bufferBits & 7);
-    bufferPos++; /* all remaining bits on the current uint8_t are set to zero. */
+    wp->buffer[wp->bufferPos] |= 0x80U >> (wp->bufferBits & 7);
+    wp->bufferPos++; /* all remaining bits on the current uint8_t are set to zero. */
     /*
      * pad with zero bits to complete (N*WHIRLPOOL_WBLOCKBITS - WHIRLPOOL_LENGTHBITS) bits:
      */
-    if (bufferPos > WHIRLPOOL_WBLOCKBYTES - WHIRLPOOL_LENGTHBYTES)
+    if (wp->bufferPos > WHIRLPOOL_WBLOCKBYTES - WHIRLPOOL_LENGTHBYTES)
     {
-        if (bufferPos < WHIRLPOOL_WBLOCKBYTES)
+        if (wp->bufferPos < WHIRLPOOL_WBLOCKBYTES)
         {
-            memset(&buffer[bufferPos], 0, WHIRLPOOL_WBLOCKBYTES - bufferPos);
+            memset(&wp->buffer[wp->bufferPos], 0, WHIRLPOOL_WBLOCKBYTES - wp->bufferPos);
         }
         /*
          * process data block:
@@ -1761,17 +1751,17 @@ void whirlpool_finalize(struct whirlpool *wp, unsigned char * const result)
         /*
          * reset buffer:
          */
-        bufferPos = 0;
+        wp->bufferPos = 0;
     }
-    if (bufferPos < WHIRLPOOL_WBLOCKBYTES - WHIRLPOOL_LENGTHBYTES)
+    if (wp->bufferPos < WHIRLPOOL_WBLOCKBYTES - WHIRLPOOL_LENGTHBYTES)
     {
-        memset(&buffer[bufferPos], 0, (WHIRLPOOL_WBLOCKBYTES - WHIRLPOOL_LENGTHBYTES) - bufferPos);
+        memset(&wp->buffer[wp->bufferPos], 0, (WHIRLPOOL_WBLOCKBYTES - WHIRLPOOL_LENGTHBYTES) - wp->bufferPos);
     }
-    bufferPos = WHIRLPOOL_WBLOCKBYTES - WHIRLPOOL_LENGTHBYTES;
+    wp->bufferPos = WHIRLPOOL_WBLOCKBYTES - WHIRLPOOL_LENGTHBYTES;
     /*
      * append bit length of hashed data:
      */
-    memcpy(&buffer[WHIRLPOOL_WBLOCKBYTES - WHIRLPOOL_LENGTHBYTES], bitLength, WHIRLPOOL_LENGTHBYTES);
+    memcpy(&wp->buffer[WHIRLPOOL_WBLOCKBYTES - WHIRLPOOL_LENGTHBYTES], wp->bitLength, WHIRLPOOL_LENGTHBYTES);
     /*
      * process data block:
      */
@@ -1792,9 +1782,6 @@ void whirlpool_finalize(struct whirlpool *wp, unsigned char * const result)
             digest[7] = (uint8_t)(wp->hash[i]      );
             digest += 8;
         }
-
-    bufferBits   = bufferBits;
-    bufferPos    = bufferPos;
 }
 
 
