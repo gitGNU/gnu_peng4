@@ -3,7 +3,7 @@
 import os,re
 
 # const char *peng_version = "4.01.000.002";
-re_ver = re.compile("_version\\s=\\s\".*?(\\d\\d\\d)\";\\s*/\*\\s*CHANGEME")
+re_ver = re.compile("_version\\s=\\s\".*?(\\d\\d\\d\\d)\";\\s*/\*\\s*CHANGEME")
 
 try:
     os.unlink("peng.c~")
