@@ -19,7 +19,7 @@ countbits: countbits.c
 
 clean:
 	rm -f peng slowpeng *.o core countbits
-	rm -f testfile*
+	rm -f testfile* *~
 
 test:
 	./dobench.sh

@@ -1,18 +1,19 @@
-IMPROVEMENT
- * cyclic influence
-
 COMPATIBILITY
  * shorten files
  * byte alignment
+ * block encryption API (for things like TrueCrypt or dm-crypt)
+ * exported API (libpeng)
 
 OPTIMIZATION
  * threads
  * bit ordering
- * better PRNG
 
 LUXURY
  * store parameters with enc file
  * integrity checks
+
+DOCUMENTATION
+ * doxygen
 
 DEBUG
  * verbosity>2 displays keys

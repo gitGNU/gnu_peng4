@@ -168,7 +168,7 @@ double mersennetwister_genrand_real3(struct mersennetwister *mt)
 double mersennetwister_genrand_res53(struct mersennetwister *mt) 
 { 
     unsigned long a=mersennetwister_genrand_int32(mt)>>5, b=mersennetwister_genrand_int32(mt)>>6; 
-    return(a*67108864.0+b)*(1.0/9007199254740992.0); 
+    return (a*67108864.0+b)*(1.0/9007199254740992.0); 
 } 
 /* These real versions are due to Isaku Wada, 2002/01/09 added */
 
