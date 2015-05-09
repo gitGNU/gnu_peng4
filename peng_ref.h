@@ -3,7 +3,10 @@ struct pengset
     unsigned            blksize;
     unsigned short     *perm1;
     unsigned short     *perm2;
-    unsigned char      *mask;
+    unsigned char      *mask1;
+#if USE_MODE_XPX
+    unsigned char      *mask2;
+#endif
 };
 
 

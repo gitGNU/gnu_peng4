@@ -12,7 +12,7 @@
 #include "peng_glob.h"
 #include "whirlpool.h"
 #include "mt19937ar.h"
-#include "slowpeng.h"
+#include "peng_ref.h"
 
 
 const char *peng_version = "4.01.00.009"; /* CHANGEME */

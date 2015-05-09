@@ -1,5 +1,5 @@
 /*
- * slowpeng.c
+ * peng_ref.c
  */
 
 
@@ -13,7 +13,7 @@
 #include <string.h>
 
 #include "mt19937ar.h"
-#include "slowpeng.h"
+#include "peng_ref.h"
 #include "peng_glob.h"
 
 
@@ -85,7 +85,10 @@ struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt)
     res->blksize = blksize;
     res->perm1 = MALLOC(blksize8*sizeof(unsigned short));
     res->perm2 = MALLOC(blksize8*sizeof(unsigned short));
-    res->mask  = MALLOC(blksize*sizeof(unsigned char));
+    res->mask1  = MALLOC(blksize*sizeof(unsigned char));
+#if USE_MODE_XPX
+    res->mask2  = MALLOC(blksize*sizeof(unsigned char));
+#endif
     memset(res->perm1, 0, blksize8);
     memset(res->perm2, 0, blksize8);
     
@@ -119,7 +122,10 @@ struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt)
     
     for(i=0; i<blksize; i++)
     {
-        res->mask[i] = q2c(mersennetwister_genrand_int32(mt));
+        res->mask1[i] = q2c(mersennetwister_genrand_int32(mt));
+#if USE_MODE_XPX
+        res->mask2[i] = q2c(mersennetwister_genrand_int32(mt));
+#endif
     }
     
     return res;
@@ -160,7 +166,10 @@ void destroypengset(struct pengset *p)
 {
     FREE(p->perm1);
     FREE(p->perm2);
-    FREE(p->mask);
+    FREE(p->mask1);
+#if USE_MODE_XPX
+    FREE(p->mask2);
+#endif
     FREE(p);
 }
 
@@ -193,10 +202,17 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
     
     if(encrypt)
     {
+        memcpy(tmpbuf, buf1, blksize);
+#if !SKIP_XOR && USE_MODE_XPX
+        for(i=0; i<blksize; i++)
+        {
+            QXOR(i, tmpbuf, p->mask2);
+        }
+#endif
 #if !SKIP_PERMUT
         for(i=0; i<blksize8; i++)
         {
-            QBITCOPY(buf1, p->perm1[i], blksize8, buf2, p->perm2[i], blksize8);
+            QBITCOPY(tmpbuf, p->perm1[i], blksize8, buf2, p->perm2[i], blksize8);
         }
 #else
         memcpy(buf2, buf1, blksize);
@@ -204,7 +220,7 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
 #if !SKIP_XOR
         for(i=0; i<blksize; i++)
         {
-            QXOR(i, buf2, p->mask);
+            QXOR(i, buf2, p->mask1);
         }
 #endif
     }
@@ -214,7 +230,7 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
 #if !SKIP_XOR
         for(i=0; i<blksize; i++)
         {
-            QXOR(i, tmpbuf, p->mask);
+            QXOR(i, tmpbuf, p->mask1);
         }
 #endif
 #if !SKIP_PERMUT
@@ -224,6 +240,12 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
         }
 #else
         memcpy(buf2, tmpbuf, blksize);
+#endif
+#if !SKIP_XOR && USE_MODE_XPX
+        for(i=0; i<blksize; i++)
+        {
+            QXOR(i, buf2, p->mask2);
+        }
 #endif
     }
 }

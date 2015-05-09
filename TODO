@@ -17,3 +17,6 @@ DOCUMENTATION
 
 DEBUG
  * verbosity>2 displays keys
+
+QUESTIONABLE
+ * CBC(X-P-X)
