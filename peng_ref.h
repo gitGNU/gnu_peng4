@@ -16,6 +16,9 @@ struct pengpipe
     unsigned            rounds;       /* y dimension */
     unsigned            variations;   /* x dimension */
     struct pengset   ***mtx;          /* 2d matrix */
+#if USE_MODE_CBC
+    unsigned char      *iv;
+#endif
 };
 
 

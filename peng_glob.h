@@ -8,3 +8,5 @@ extern int verbosity;
 
 
 void *chkmalloc(unsigned x);
+
+void memxor(void *dst, const void *src, unsigned sz);

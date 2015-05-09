@@ -33,8 +33,6 @@
 #define QBITCOPY(b1,o1,m1,b2,o2,m2) qbitcopy(b1,o1,b2,o2)
 #endif
 
-#define QXOR(i, buf, msk) buf[i] ^= msk[i]
-
 
 static unsigned char q2c(unsigned long long x)
 {
@@ -157,6 +155,13 @@ struct pengpipe *genpengpipe(unsigned blksize, unsigned rounds, unsigned variati
             res->mtx[i][j] = genpengset(blksize, mt);
         }
     }
+#if USE_MODE_CBC
+    res->iv = MALLOC(blksize);
+    for(i=0; i<blksize; i++)
+    {
+        res->iv[i] = q2c(mersennetwister_genrand_int32(mt));
+    }
+#endif
     fputs("\n", stdout);
     return res;
 }
@@ -190,6 +195,9 @@ void destroypengpipe(struct pengpipe *p)
         FREE(p->mtx[i]);
     }
     FREE(p->mtx);
+#if USE_MODE_CBC
+    FREE(p->iv);
+#endif
     FREE(p);
 }
 
@@ -204,10 +212,7 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
     {
         memcpy(tmpbuf, buf1, blksize);
 #if !SKIP_XOR && USE_MODE_XPX
-        for(i=0; i<blksize; i++)
-        {
-            QXOR(i, tmpbuf, p->mask2);
-        }
+        memxor(tmpbuf, p->mask2, blksize);
 #endif
 #if !SKIP_PERMUT
         for(i=0; i<blksize8; i++)
@@ -218,20 +223,14 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
         memcpy(buf2, buf1, blksize);
 #endif
 #if !SKIP_XOR
-        for(i=0; i<blksize; i++)
-        {
-            QXOR(i, buf2, p->mask1);
-        }
+        memxor(buf2, p->mask1, blksize);
 #endif
     }
     else
     {
         memcpy(tmpbuf, buf1, blksize);
 #if !SKIP_XOR
-        for(i=0; i<blksize; i++)
-        {
-            QXOR(i, tmpbuf, p->mask1);
-        }
+        memxor(tmpbuf, p->mask1, blksize);
 #endif
 #if !SKIP_PERMUT
         for(i=0; i<blksize8; i++)
@@ -242,10 +241,7 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
         memcpy(buf2, tmpbuf, blksize);
 #endif
 #if !SKIP_XOR && USE_MODE_XPX
-        for(i=0; i<blksize; i++)
-        {
-            QXOR(i, buf2, p->mask2);
-        }
+        memxor(buf2, p->mask2, blksize);
 #endif
     }
 }
@@ -255,10 +251,25 @@ void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf
 {
     int i,j;
     unsigned off;
+#if USE_MODE_CBC
+    unsigned char *lastbuf = alloca(p->blksize);
+    
+    memcpy(lastbuf, p->iv, p->blksize);
+#endif
     
     for(i=0; i<p->variations; i++)
     {
         off = i*p->blksize;
+#if USE_MODE_CBC
+        if(encrypt)
+        {
+            memxor(buf1+off, lastbuf, p->blksize);
+        }
+        else
+        {
+            memcpy(lastbuf, buf1+off, p->blksize);
+        }
+#endif
         for(j=0; j<p->rounds; j++)
         {
             execpengset(p->mtx[i][j], buf1+off, tmpbuf, buf2+off, encrypt);
@@ -268,6 +279,16 @@ void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf
                 memcpy(buf1+off, buf2+off, p->blksize);
             }
         }
+#if USE_MODE_CBC
+        if(!encrypt)
+        {
+            memxor(buf2+off, lastbuf, p->blksize);
+        }
+        else
+        {
+            memcpy(lastbuf, buf2+off, p->blksize);
+        }
+#endif
     }
 }
 

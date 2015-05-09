@@ -22,6 +22,7 @@ ENT (Random)
 Public Domain
 http://www.fourmilab.ch/random/
 
+http://www.phy.duke.edu/~rgb/General/dieharder.php
 
 $ ent ur_testfile 
 Entropy = 7.999997 bits per byte.
