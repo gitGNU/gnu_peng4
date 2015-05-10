@@ -15,7 +15,7 @@
 #include "peng_ref.h"
 
 
-const char *peng_version = "4.01.00.0031"; /* CHANGEME */
+const char *peng_version = "4.01.00.0032"; /* CHANGEME */
 
 
 #define MAXFNLEN 1024
@@ -293,10 +293,13 @@ int main(int argc, char **argv)
     
     peng_cmd_prep(&mypce, blksize, rounds, variations, passphrase, eflag);
     
-    printf("ID = ");
-    for(i=0; i<10; i++)
-        printf("%08lx ", mersennetwister_genrand_int32(&mypce.mt));
-    puts(""); fflush(stdout);
+    if(verbosity>2)
+    {
+        printf("ID = ");
+        for(i=0; i<10; i++)
+            printf("%08lx ", mersennetwister_genrand_int32(&mypce.mt));
+        puts(""); fflush(stdout);
+    }
     
     for(i=optind; i<argc; i++)
     {

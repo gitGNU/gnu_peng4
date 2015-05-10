@@ -253,6 +253,7 @@ void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf
     unsigned off;
 #if USE_MODE_CBC
     unsigned char *lastbuf = alloca(p->blksize);
+    unsigned char *lastbuftmp = alloca(p->blksize);
     
     memcpy(lastbuf, p->iv, p->blksize);
 #endif
@@ -267,7 +268,7 @@ void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf
         }
         else
         {
-            memcpy(lastbuf, buf1+off, p->blksize);
+            memcpy(lastbuftmp, buf1+off, p->blksize);
         }
 #endif
         if(encrypt)
@@ -294,6 +295,7 @@ void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf
         if(!encrypt)
         {
             memxor(buf2+off, lastbuf, p->blksize);
+            memcpy(lastbuf, lastbuftmp, p->blksize);
         }
         else
         {
