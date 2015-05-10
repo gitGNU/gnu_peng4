@@ -15,7 +15,7 @@
 #include "peng_ref.h"
 
 
-const char *peng_version = "4.01.00.0030"; /* CHANGEME */
+const char *peng_version = "4.01.00.0031"; /* CHANGEME */
 
 
 #define MAXFNLEN 1024
@@ -155,11 +155,11 @@ void peng_cmd_unprep(struct peng_cmd_environment *pce)
 void printversion(void)
 {
 #if DORKY || SKIP_XOR || SKIP_PERMUT
-    puts("THIS IS A TESTING VERSION //UNFIT\\\\ FOR PRODUCTION USE!");
+    puts("THIS IS A TESTING VERSION //UNFIT\\\\ FOR PRODUCTION USE!\n");
     puts("If you are not in the inner circle of testers, please do not use this\n"
          "piece of software.");
 #elif ALPHA
-    puts("This is a ALPHA testing version not meant for production use.");
+    puts("This is an ALPHA testing version not meant for production use.\n");
     puts("If you are not in the inner circle of testers, please do not use this\n"
          "piece of software.");
 #elif BETA

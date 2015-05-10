@@ -270,15 +270,26 @@ void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf
             memcpy(lastbuf, buf1+off, p->blksize);
         }
 #endif
-        for(j=0; j<p->rounds; j++)
-        {
-            execpengset(p->mtx[i][j], buf1+off, tmpbuf, buf2+off, encrypt);
-            /* copy buf2 back to buf1 */
-            if(j<p->rounds-1)
+        if(encrypt)
+            for(j=0; j<p->rounds; j++)
             {
-                memcpy(buf1+off, buf2+off, p->blksize);
+                execpengset(p->mtx[i][j], buf1+off, tmpbuf, buf2+off, encrypt);
+                /* copy buf2 back to buf1 */
+                if(j<p->rounds-1)
+                {
+                    memcpy(buf1+off, buf2+off, p->blksize);
+                }
             }
-        }
+        else
+            for(j=p->rounds-1; j>=0; j--)
+            {
+                execpengset(p->mtx[i][j], buf1+off, tmpbuf, buf2+off, encrypt);
+                /* copy buf2 back to buf1 */
+                if(j>0)
+                {
+                    memcpy(buf1+off, buf2+off, p->blksize);
+                }
+            }
 #if USE_MODE_CBC
         if(!encrypt)
         {
