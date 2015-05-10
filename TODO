@@ -26,6 +26,9 @@ QUESTIONABLE
 SECURITY
  X padding in peng_cmd_process()
 
+SECURITY (MINOR)
+ * erase buffers after use
+
 FAULT
  * PERMUT(only) shows same result for dec_1 and dec_2, but inversion doesn't work
 

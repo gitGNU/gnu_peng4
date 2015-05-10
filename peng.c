@@ -15,7 +15,7 @@
 #include "peng_ref.h"
 
 
-const char *peng_version = "4.01.00.009"; /* CHANGEME */
+const char *peng_version = "4.01.00.0029"; /* CHANGEME */
 
 
 #define MAXFNLEN 1024
@@ -71,7 +71,7 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned 
 int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const char *outfn)
 {
     int h1, h2;
-    int i,j;
+    int i,j,k;
     unsigned num=0;
     
     h1 = open(infn, O_RDONLY);
@@ -100,7 +100,9 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
             fflush(stdout);
         }
         
+        /*
         memset(pce->buf1, 0, pce->bufsize);
+        */
         i = read(h1, pce->buf1, pce->bufsize);
         if(i<0)
         {
@@ -110,7 +112,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         if(i<=0)
             break;
         
-        if(i<pce->bufsize)
+        if(pce->eflag && i<pce->bufsize)
             do_padding(pce->buf1+i, pce->bufsize-i);
         
         if(!pce->eflag && i<pce->bufsize)
@@ -123,15 +125,16 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         /* execpengset(ps, buf1, buf2, buf3, eflag); */
         execpengpipe(pce->pp, pce->buf1, pce->buf2, pce->buf3, pce->eflag);
         
-        j = write(h2, pce->buf3, pce->eflag?(pce->bufsize):i);    /* TODO: this looks like a problem */
+        k = pce->eflag?(pce->bufsize):i;
+        j = write(h2, pce->buf3, k);    /* TODO: this looks like a problem */
         if(j<0)
         {
             perror(outfn);
             return -1;
         }
-        if(i!=j)
+        if(k!=j)
         {
-            fputs("warning: bytes read != bytes written\n", stderr);
+            fputs("warning: bytes buffered not equal bytes written\n", stderr);
         }
     }
     close(h1);
