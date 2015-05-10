@@ -12,6 +12,7 @@ struct mersennetwister
 void mersennetwister_init_genrand(struct mersennetwister *mt, unsigned long s);
 void mersennetwister_init_by_array(struct mersennetwister *mt, unsigned long init_key[], int key_length);
 unsigned long mersennetwister_genrand_int32(struct mersennetwister *mt);
+unsigned long mersennetwister_genrand_int32_strong(struct mersennetwister *mt, unsigned long mx);
 long mersennetwister_genrand_int31(struct mersennetwister *mt);
 double mersennetwister_genrand_real1(struct mersennetwister *mt);
 double mersennetwister_genrand_real2(struct mersennetwister *mt);

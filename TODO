@@ -21,6 +21,11 @@ DEBUG
 
 QUESTIONABLE
  X CBC(X-P-X)
+ * review q2c()
 
 SECURITY
  X padding in peng_cmd_process()
+
+FAULT
+ * PERMUT(only) shows same result for dec_1 and dec_2, but inversion doesn't work
+

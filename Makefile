@@ -1,4 +1,4 @@
-DEFS = -DDORKY=0 -DSKIP_XOR=0 -DSKIP_PERMUT=0 -DDEBUG=0 -DBETA=1 -DALPHA=1 \
+DEFS = -DDORKY=0 -DSKIP_XOR=1 -DSKIP_PERMUT=0 -DDEBUG=0 -DBETA=1 -DALPHA=1 \
  -DUSE_MODE_XPX=0 -DUSE_MODE_CBC=0
 
 #CFLAGS = -O2 -Wall -Wno-pointer-sign -std=c90 -ggdb -D_GNU_SOURCE
@@ -33,7 +33,7 @@ test:
 
 ci: clean
 	./updver.py
-	git add *.c *.h Makefile *.sh TODO README LICENSE *.py
+	git add *.c *.h Makefile *.sh TODO README LICENSE *.py external/*.c external/*.h
 	git ci
 
 keywords:

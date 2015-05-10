@@ -137,6 +137,30 @@ unsigned long mersennetwister_genrand_int32(struct mersennetwister *mt)
     return y;
 }
 
+unsigned long mersennetwister_genrand_int32_strong(struct mersennetwister *mt, unsigned long mx)
+{
+    unsigned long u;
+    unsigned long mask = 0xfffffffful;
+    
+    /* speed it up a little bit */
+    if(mx<=0x1000000)
+    {
+        if(mx<=0x10000)
+        {
+            if(mx<=0x100)
+                mask = 0xff;
+            else
+                mask = 0xffff;
+        }
+        else
+            mask = 0xffffff;
+    }
+    do
+        u = mersennetwister_genrand_int32(mt) & mask;
+     while(u>=mx);
+    return u;
+}
+
 /* generates a random number on [0,0x7fffffff]-interval */
 long mersennetwister_genrand_int31(struct mersennetwister *mt)
 {

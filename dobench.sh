@@ -9,7 +9,7 @@ PROXY=/usr/bin/time
 PARM=8192,5,8
 V=-vvv
 
-TESTSOURCE=testdata/x10mb
+TESTSOURCE=testdata/x128mib
 TESTFILE=testfile
 
 [[ -e $TESTFILE ]] || cp $TESTSOURCE $TESTFILE

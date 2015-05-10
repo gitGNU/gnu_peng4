@@ -51,10 +51,10 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned 
         fflush(stdout);
     }
     
-    mersennetwister_init_by_array(&pce->mt, (unsigned long *)digest, WHIRLPOOL_DIGESTBYTES/4);  /* TODO byte order, packing */
+    mersennetwister_init_by_array(&pce->mt, (unsigned long *)digest, WHIRLPOOL_DIGESTBYTES/sizeof(unsigned long));  /* TODO byte order, packing */
     
     pce->pp = genpengpipe(blksize, rounds, variations, &pce->mt);
-    pce->blksize = blksize;    /* again, this is the third time this value is stored */
+    pce->blksize = blksize;    /* again, this is the third time this value is stored (in variants) */
     pce->bufsize = getbufsize(pce->pp);
     pce->eflag = eflag?1:0;
     

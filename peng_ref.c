@@ -98,6 +98,16 @@ struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt)
         do
             k = mersennetwister_genrand_int32(mt) % blksize8;
         while(tempflg2[k]);
+        
+        /* TODO this is even better, but can be really slow... */
+        /*
+        do
+            j = mersennetwister_genrand_int32_strong(mt, blksize8);
+        while(tempflg1[j]);
+        do
+            k = mersennetwister_genrand_int32_strong(mt, blksize8);
+        while(tempflg2[k]);
+        */
 #endif
         tempflg1[j] = 1;
         tempflg2[k] = 1;
@@ -210,7 +220,7 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
             QBITCOPY(tmpbuf, p->perm1[i], blksize8, buf2, p->perm2[i], blksize8);
         }
 #else
-        memcpy(buf2, buf1, blksize);
+        memcpy(buf2, tmpbuf, blksize);
 #endif
 #if !SKIP_XOR
         memxor(buf2, p->mask1, blksize);
