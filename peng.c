@@ -110,6 +110,9 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         if(i<=0)
             break;
         
+        if(i<pce->bufsize)
+            do_padding(pce->buf1+i, pce->bufsize-i);
+        
         if(!pce->eflag && i<pce->bufsize)
         {
             fputs("warning: expected a full block while reading for decryption\n", stderr);
@@ -120,7 +123,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         /* execpengset(ps, buf1, buf2, buf3, eflag); */
         execpengpipe(pce->pp, pce->buf1, pce->buf2, pce->buf3, pce->eflag);
         
-        j = write(h2, pce->buf3, pce->eflag?(pce->bufsize):i);
+        j = write(h2, pce->buf3, pce->eflag?(pce->bufsize):i);    /* TODO: this looks like a problem */
         if(j<0)
         {
             perror(outfn);

@@ -17,6 +17,10 @@ DOCUMENTATION
 
 DEBUG
  * verbosity>2 displays keys
+ * debug system
 
 QUESTIONABLE
- * CBC(X-P-X)
+ X CBC(X-P-X)
+
+SECURITY
+ X padding in peng_cmd_process()

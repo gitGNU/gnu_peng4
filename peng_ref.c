@@ -30,7 +30,7 @@
 #if DEBUG
 #define QBITCOPY(b1,o1,m1,b2,o2,m2) qbitcopy(b1,o1,m1,b2,o2,m2)
 #else
-#define QBITCOPY(b1,o1,m1,b2,o2,m2) qbitcopy(b1,o1,b2,o2)
+#define QBITCOPY(b1,o1,m1,b2,o2,m2) { if(b1[o1/8] & (1U<<(o1&7)))     b2[o2/8] |= (unsigned char)(1U<<(o2&7)); }
 #endif
 
 
@@ -50,16 +50,6 @@ static void qbitcopy(const unsigned char *buf1, unsigned off1, unsigned max1, un
         abort();
     }
     
-    if(buf1[off1/8] & (1U<<(off1&7)))
-        buf2[off2/8] |= (unsigned char)(1U<<(off2&7));
-    /*
-    else
-        buf2[off2/8] &= ~(unsigned char)(1U<<(off2&7));
-    */
-}
-#else
-static void qbitcopy(const unsigned char *buf1, unsigned off1, unsigned char *buf2, unsigned off2)
-{
     if(buf1[off1/8] & (1U<<(off1&7)))
         buf2[off2/8] |= (unsigned char)(1U<<(off2&7));
     /*

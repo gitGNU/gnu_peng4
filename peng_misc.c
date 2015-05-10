@@ -28,3 +28,25 @@ void memxor(void *dst0, const void *src0, unsigned sz0)
         *dst++ ^= *src++;
 }
 
+
+/* TODO: this is POSIX only */
+void do_padding(void *buf0, unsigned sz0)
+{
+    FILE *f = fopen("/dev/urandom", "r");
+    register unsigned char *buf = (unsigned char *)buf0;
+    register unsigned sz = sz0;
+    int c;
+    
+    while(sz--)
+    {
+        c = fgetc(f);
+        if(c<0)
+        {
+            perror("/dev/urandom");
+            abort();
+        }
+        *buf++ = (unsigned char) c;
+    }
+    fclose(f);
+}
+
