@@ -1,29 +1,26 @@
 #! /bin/bash
 
-gentestdata()
-{
-  find /usr/src/linux/ -name "*.c" |while read a
-  do
-    cat "$a"
-  done |buffer
-}
-
-#ulimit -c unlimited
+ulimit -c unlimited
 set -e
 
-PROXY=
+PROXY=/usr/bin/time
 
-PARM=32760,3,44
+#PARM=32760,19,19
+PARM=8192,6,10
 V=-vvv
 
+TESTSOURCE=testdata/c_64mib
 TESTFILE=testfile
 
-[[ -e $TESTFILE ]] || (gentestdata |dd of=$TESTFILE bs=1024 count=65536 iflag=fullblock)
+cp $TESTSOURCE $TESTFILE
 
 $PROXY ./peng -n -O $PARM $V -P blablaBLOEBLOE $TESTFILE
+#cp ${TESTFILE}.enc ${TESTFILE}_dec_3
 cp ${TESTFILE}.enc ${TESTFILE}_dec_2
 cp ${TESTFILE}.enc ${TESTFILE}_dec_1
 $PROXY ./peng -R -d -O $PARM $V -P blablaBLOEBLOE ${TESTFILE}_dec_1
 $PROXY ./peng -R -d -O $PARM $V -P blablaBLOEBLuE ${TESTFILE}_dec_2
+#$PROXY ./peng -R -d -O $PARM $V -P SomethingTOTALLYdifferent\! ${TESTFILE}_dec_3
 
+echo
 md5sum ${TESTFILE}*

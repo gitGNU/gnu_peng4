@@ -15,7 +15,7 @@
 #include "peng_ref.h"
 
 
-const char *peng_version = "4.01.00.0037"; /* CHANGEME */
+const char *peng_version = "4.01.00.0038"; /* CHANGEME */
 
 
 const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };
@@ -135,7 +135,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         
         if(!pce->eflag && i<pce->bufsize)
         {
-            fprintf("warning: %s: expected a full block while reading for decryption\n", outfn);
+            fprintf(stderr, "warning: %s: expected a full block while reading for decryption\n", outfn);
         }
         
         /* memset(pce->buf2, 0, pce->bufsize); */
