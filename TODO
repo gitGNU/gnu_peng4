@@ -1,6 +1,6 @@
 COMPATIBILITY
- * shorten files
- * byte alignment
+ X shorten files (may fail if length difference < 3)
+ * byte order (alignment?)
  * block encryption API (for things like TrueCrypt or dm-crypt)
  * exported API (libpeng)
 

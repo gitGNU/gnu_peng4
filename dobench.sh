@@ -6,13 +6,13 @@ set -e
 PROXY=/usr/bin/time
 
 #PARM=32760,19,19
-PARM=8192,8,8
+PARM=8192,6,10
 V=-vvv
 
 TESTSOURCE=testdata/c_64mib
 TESTFILE=testfile
 
-[[ -e $TESTFILE ]] || cp $TESTSOURCE $TESTFILE
+cp $TESTSOURCE $TESTFILE
 
 $PROXY ./peng -n -O $PARM $V -P blablaBLOEBLOE $TESTFILE
 #cp ${TESTFILE}.enc ${TESTFILE}_dec_3

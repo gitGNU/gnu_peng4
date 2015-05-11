@@ -3,10 +3,12 @@ based on long-distance bit permutations. It is still experimental. Written in C,
 it is suprisingly fast on modern computers. Lower performance is partially 
 intended because of more difficult brute force attacks. The project was started 
 in 1998, and in generation 4 the main objective was to avoid manual 
-optimizations, since, surprisingly, bitpacking and access ordering have made 
+optimizations, since surprisingly, bitpacking and access ordering have made 
 things worse. The algorithm and the tool is intended for top secret material, 
 albeit its implementation is experimental and may be faulty or too simplistic in 
 some point of view. Caveat utilitor!
+
+Algorithms used:
 
 MT19937
 BSD License

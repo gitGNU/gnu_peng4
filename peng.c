@@ -15,7 +15,10 @@
 #include "peng_ref.h"
 
 
-const char *peng_version = "4.01.00.0034"; /* CHANGEME */
+const char *peng_version = "4.01.00.0035"; /* CHANGEME */
+
+
+const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };
 
 
 #define MAXFNLEN 1024
@@ -46,7 +49,7 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned 
 
     if(verbosity>2)
     {
-        printf("passphrase = %s\n", passphrase);
+        /* printf("passphrase = %s\n", passphrase); */
         printf("whirlpool = %s\n", whirlpool_hexhash(&wp));
         fflush(stdout);
     }
@@ -71,8 +74,10 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned 
 int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const char *outfn)
 {
     int h1, h2;
-    int i,j,k;
+    int i,j,k,z;
+    int guess_eof = 0;
     unsigned num=0;
+    unsigned long long total, pos=0;
     
     h1 = open(infn, O_RDONLY);
     if(h1<0)
@@ -87,6 +92,10 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         close(h1);
         return -1;
     }
+    
+    total = lseek(h1, 0, SEEK_END);
+    lseek(h1, 0, SEEK_SET);
+    
     if(verbosity>0)
     {
         printf("%30s   -%c->    %-30s\n", infn, pce->eflag ? 'e':'d', outfn);
@@ -100,32 +109,51 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
             fflush(stdout);
         }
         
-        /*
-        memset(pce->buf1, 0, pce->bufsize);
-        */
+        /* memset(pce->buf1, 0, pce->bufsize); */
         i = read(h1, pce->buf1, pce->bufsize);
         if(i<0)
         {
             perror(infn);
             return -1;
         }
+        
         if(i<=0)
             break;
         
+        pos += i;
+        if(total>0 && pos>=total)
+            guess_eof = 1;
+        
         if(pce->eflag && i<pce->bufsize)
-            do_padding(pce->buf1+i, pce->bufsize-i);
+        {
+            /* Pad buffer with random data and mark EOF.
+             * special case: the input file matches the block size exactly; then:
+             * do NOT use a EOF magic
+             */
+            do_padding(pce->buf1+i, pce->bufsize-i, eof_magic, sizeof eof_magic / sizeof eof_magic[0]);
+        }
         
         if(!pce->eflag && i<pce->bufsize)
         {
             fputs("warning: expected a full block while reading for decryption\n", stderr);
         }
         
-        memset(pce->buf2, 0, pce->bufsize);
-        memset(pce->buf3, 0, pce->bufsize);
+        /* memset(pce->buf2, 0, pce->bufsize); */
+        /* memset(pce->buf3, 0, pce->bufsize); */
         /* execpengset(ps, buf1, buf2, buf3, eflag); */
         execpengpipe(pce->pp, pce->buf1, pce->buf2, pce->buf3, pce->eflag);
         
         k = pce->eflag?(pce->bufsize):i;
+        
+        if(!pce->eflag && guess_eof)
+        {
+            /* Find the EOF marker.
+             */
+            z = locrr(pce->buf3, k, eof_magic, sizeof eof_magic / sizeof eof_magic[0], 3);
+            if(z>=0)
+                k = z;
+        }
+        
         j = write(h2, pce->buf3, k);    /* TODO: this looks like a problem */
         if(j<0)
         {

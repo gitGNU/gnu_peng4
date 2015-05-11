@@ -11,6 +11,10 @@ SOURCES= external/whirlpool.c external/mt19937ar.c \
 
 TARGETS= $(addsuffix .o, $(basename $(SOURCES)))
 
+EXTRA= TODO README LICENSE CHANGELOG
+
+##############################################################################
+
 all: peng countbits
 
 %.o: %.c
@@ -34,7 +38,7 @@ test:
 
 ci: clean
 	./updver.py
-	git add *.c *.h Makefile *.sh TODO README LICENSE *.py external/*.c external/*.h
+	git add *.c *.h Makefile $(EXTRA) *.sh *.py external/*.c external/*.h
 	git ci
 
 keywords:
@@ -46,5 +50,5 @@ push:
 ##############################################################################
 
 tarball:
-	tar -cjf peng4-$(shell ./getver.sh).tar.bz2 *
+	tar -cjf peng4-$(shell ./getver.sh).tar.bz2 $(SOURCES) $(EXTRA) *.sh *.py
 
