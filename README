@@ -52,18 +52,18 @@ Monte Carlo value for Pi is 3.142242562 (error 0.02 percent).
 Serial correlation coefficient is 0.000083 (totally uncorrelated = 0.0).
 
 
-$ ent testfile.enc 
-Entropy = 7.999876 bits per byte.
+$ ent testfile.enc
+Entropy = 7.999995 bits per byte.
 
 Optimum compression would reduce the size
-of this 67747680 byte file by 0 percent.
+of this 107544576 byte file by 0 percent.
 
-Chi square distribution for 67747680 samples is 11679.38, and randomly
+Chi square distribution for 107544576 samples is 724.99, and randomly
 would exceed this value less than 0.01 percent of the times.
 
-Arithmetic mean value of data bytes is 127.4532 (127.5 = random).
-Monte Carlo value for Pi is 3.144639757 (error 0.10 percent).
-Serial correlation coefficient is -0.000637 (totally uncorrelated = 0.0).
+Arithmetic mean value of data bytes is 127.5086 (127.5 = random).
+Monte Carlo value for Pi is 3.140441560 (error 0.04 percent).
+Serial correlation coefficient is -0.000022 (totally uncorrelated = 0.0).
 
 
 $ ent ~/1mbtest-entropy.bin 

@@ -16,8 +16,8 @@ DOCUMENTATION
  * doxygen
 
 DEBUG
- * verbosity>2 displays keys
- * debug system
+ X verbosity>2 displays keys
+ * debug system (flags)
 
 QUESTIONABLE
  X CBC(X-P-X)
@@ -28,7 +28,4 @@ SECURITY
 
 SECURITY (MINOR)
  * erase buffers after use
-
-FAULT
- * PERMUT(only) shows same result for dec_1 and dec_2, but inversion doesn't work
 

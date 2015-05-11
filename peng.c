@@ -15,7 +15,7 @@
 #include "peng_ref.h"
 
 
-const char *peng_version = "4.01.00.0032"; /* CHANGEME */
+const char *peng_version = "4.01.00.0034"; /* CHANGEME */
 
 
 #define MAXFNLEN 1024

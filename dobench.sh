@@ -6,10 +6,10 @@ set -e
 PROXY=/usr/bin/time
 
 #PARM=32760,19,19
-PARM=8192,5,8
+PARM=8192,8,8
 V=-vvv
 
-TESTSOURCE=testdata/x128mib
+TESTSOURCE=testdata/c_64mib
 TESTFILE=testfile
 
 [[ -e $TESTFILE ]] || cp $TESTSOURCE $TESTFILE
