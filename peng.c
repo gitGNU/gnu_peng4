@@ -15,7 +15,7 @@
 #include "peng_ref.h"
 
 
-const char *peng_version = "4.01.00.0036"; /* CHANGEME */
+const char *peng_version = "4.01.00.0037"; /* CHANGEME */
 
 
 const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };
@@ -203,7 +203,7 @@ void peng_cmd_unprep(struct peng_cmd_environment *pce)
 void printversion(void)
 {
 #if DORKY || SKIP_XOR || SKIP_PERMUT
-    puts("THIS IS A TESTING VERSION //UNFIT\\\\ FOR PRODUCTION USE!\n");
+    puts("THIS IS A TESTING VERSION **UNFIT** FOR PRODUCTION USE!\n");
     puts("If you are not in the inner circle of testers, please do not use this\n"
          "piece of software.");
 #elif ALPHA
