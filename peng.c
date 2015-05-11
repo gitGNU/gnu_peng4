@@ -15,7 +15,7 @@
 #include "peng_ref.h"
 
 
-const char *peng_version = "4.01.00.0035"; /* CHANGEME */
+const char *peng_version = "4.01.00.0036"; /* CHANGEME */
 
 
 const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };
@@ -76,7 +76,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
     int h1, h2;
     int i,j,k,z;
     int guess_eof = 0;
-    unsigned num=0;
+    unsigned num=0, padding_remaining=0;
     unsigned long long total, pos=0;
     
     h1 = open(infn, O_RDONLY);
@@ -130,12 +130,12 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
              * special case: the input file matches the block size exactly; then:
              * do NOT use a EOF magic
              */
-            do_padding(pce->buf1+i, pce->bufsize-i, eof_magic, sizeof eof_magic / sizeof eof_magic[0]);
+            padding_remaining = do_padding(pce->buf1+i, pce->bufsize-i, eof_magic, sizeof eof_magic / sizeof eof_magic[0], 0);
         }
         
         if(!pce->eflag && i<pce->bufsize)
         {
-            fputs("warning: expected a full block while reading for decryption\n", stderr);
+            fprintf("warning: %s: expected a full block while reading for decryption\n", outfn);
         }
         
         /* memset(pce->buf2, 0, pce->bufsize); */
@@ -154,7 +154,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
                 k = z;
         }
         
-        j = write(h2, pce->buf3, k);    /* TODO: this looks like a problem */
+        j = write(h2, pce->buf3, k);
         if(j<0)
         {
             perror(outfn);
@@ -162,9 +162,29 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         }
         if(k!=j)
         {
-            fputs("warning: bytes buffered not equal bytes written\n", stderr);
+            fprintf(stderr, "warning: %s: bytes buffered not equal bytes written\n", outfn);
+        }
+        if(guess_eof)
+            break;    /* this is to avoid some tricky problems (with growing files) */
+    }
+    
+    if(padding_remaining)  /* encrypting */
+    {
+        do_padding(pce->buf1, pce->bufsize, eof_magic, sizeof eof_magic / sizeof eof_magic[0], padding_remaining);
+        execpengpipe(pce->pp, pce->buf1, pce->buf2, pce->buf3, pce->eflag);
+        k = pce->bufsize;
+        j = write(h2, pce->buf3, k);
+        if(j<0)
+        {
+            perror(outfn);
+            return -1;
+        }
+        if(k!=j)
+        {
+            fprintf(stderr, "warning: %s: bytes buffered not equal bytes written (fin)\n", outfn);
         }
     }
+    
     close(h1);
     close(h2);
     return 0;

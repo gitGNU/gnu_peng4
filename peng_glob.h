@@ -13,6 +13,6 @@ int mymemcmp(const void *abuf0, const void *bbuf0, unsigned sz0);
 
 void memxor(void *dst0, const void *src0, unsigned sz0);
 
-void do_padding(void *buf0, unsigned sz0, const unsigned long *marker, unsigned nmarker);
+unsigned do_padding(void *buf0, unsigned sz0, const unsigned long *marker, unsigned nmarker, unsigned marker_byteoffset);
 
 unsigned locrr(void *buf, unsigned sz, const unsigned long *marker, unsigned nmarker, int minmatch);

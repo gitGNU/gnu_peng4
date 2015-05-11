@@ -1,5 +1,4 @@
 COMPATIBILITY
- X shorten files (may fail if length difference < 3)
  * byte order (alignment?)
  * block encryption API (for things like TrueCrypt or dm-crypt)
  * exported API (libpeng)
@@ -16,16 +15,28 @@ DOCUMENTATION
  * doxygen
 
 DEBUG
- X verbosity>2 displays keys
  * debug system (flags)
 
 QUESTIONABLE
- X CBC(X-P-X)
  * review q2c()
-
-SECURITY
- X padding in peng_cmd_process()
 
 SECURITY (MINOR)
  * erase buffers after use
+
+TEST
+ * automated test
+
+
+ 
+################################################
+################################################
+################################################
+
+
+
+DONE
+ X CBC(X-P-X)
+ X padding in peng_cmd_process()
+ X verbosity>2 displays keys
+ X shorten files (may fail if length difference < 3)
 

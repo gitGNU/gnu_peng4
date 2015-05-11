@@ -45,36 +45,44 @@ int mymemcmp(const void *abuf0, const void *bbuf0, unsigned sz0)
 
 /* TODO: this is POSIX only */
 /* TODO: byte order */
-void do_padding(void *buf0, unsigned sz0, const unsigned long *marker, unsigned nmarker)
+unsigned do_padding(void *buf0, unsigned sz0, const unsigned long *marker, unsigned nmarker, unsigned marker_byteoffset)
 {
-    FILE *f = fopen("/dev/urandom", "r");
+    FILE *f;
     register unsigned char *buf = (unsigned char *)buf0;
     register unsigned sz = sz0;
     int c;
-    unsigned i;
+    unsigned i, r=0;
 
     if(marker && nmarker)
     {
-        i = nmarker*sizeof(unsigned long);
+        i = nmarker*sizeof(unsigned long) - marker_byteoffset;
         if(sz<i)
+        {
+            r = i - sz;
             i = sz;
-        memcpy(buf, marker, i);
+        }
+        memcpy(buf, ((unsigned char *)marker)+marker_byteoffset, i);
         
         sz-=i;
         buf+=i;
     }
     
-    while(sz-->0)
+    if(sz>0)
     {
-        c = fgetc(f);
-        if(c<0)
+        f = fopen("/dev/urandom", "r");
+        while(sz-->0)
         {
-            perror("/dev/urandom");
-            abort();
+            c = fgetc(f);
+            if(c<0)
+            {
+                perror("/dev/urandom");
+                abort();
+            }
+            *buf++ = (unsigned char) c;
         }
-        *buf++ = (unsigned char) c;
+        fclose(f);
     }
-    fclose(f);
+    return r;
 }
 
 
