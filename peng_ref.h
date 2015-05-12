@@ -28,5 +28,5 @@ struct pengpipe *genpengpipe(unsigned blksize, unsigned rounds, unsigned variati
 void destroypengset(struct pengset *p);
 void destroypengpipe(struct pengpipe *p);
 void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt);
-void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt);
+void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt, char threads_flag);
 unsigned long getbufsize(struct pengpipe *p);

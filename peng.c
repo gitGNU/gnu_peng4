@@ -15,7 +15,7 @@
 #include "peng_ref.h"
 
 
-const char *peng_version = "4.01.00.0038"; /* CHANGEME */
+const char *peng_version = "4.01.00.0039"; /* CHANGEME */
 
 
 const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };
@@ -71,7 +71,7 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned 
 }
 
 
-int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const char *outfn)
+int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const char *outfn, char multithreading)
 {
     int h1, h2;
     int i,j,k,z;
@@ -141,7 +141,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         /* memset(pce->buf2, 0, pce->bufsize); */
         /* memset(pce->buf3, 0, pce->bufsize); */
         /* execpengset(ps, buf1, buf2, buf3, eflag); */
-        execpengpipe(pce->pp, pce->buf1, pce->buf2, pce->buf3, pce->eflag);
+        execpengpipe(pce->pp, pce->buf1, pce->buf2, pce->buf3, pce->eflag, multithreading);
         
         k = pce->eflag?(pce->bufsize):i;
         
@@ -149,9 +149,9 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         {
             /* Find the EOF marker.
              */
-            z = locrr(pce->buf3, k, eof_magic, sizeof eof_magic / sizeof eof_magic[0], 3);
-            if(z>=0)
-                k = z;
+            /* z = locrr(pce->buf3, k, eof_magic, sizeof eof_magic / sizeof eof_magic[0], 3);  */ /* TODO */
+            /* if(z>=0)
+                k = z; */
         }
         
         j = write(h2, pce->buf3, k);
@@ -171,7 +171,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
     if(padding_remaining)  /* encrypting */
     {
         do_padding(pce->buf1, pce->bufsize, eof_magic, sizeof eof_magic / sizeof eof_magic[0], padding_remaining);
-        execpengpipe(pce->pp, pce->buf1, pce->buf2, pce->buf3, pce->eflag);
+        execpengpipe(pce->pp, pce->buf1, pce->buf2, pce->buf3, pce->eflag, multithreading);
         k = pce->bufsize;
         j = write(h2, pce->buf3, k);
         if(j<0)
@@ -202,8 +202,9 @@ void peng_cmd_unprep(struct peng_cmd_environment *pce)
 
 void printversion(void)
 {
-#if DORKY || SKIP_XOR || SKIP_PERMUT
-    puts("THIS IS A TESTING VERSION **UNFIT** FOR PRODUCTION USE!\n");
+#if DORKY || SEMIDORKY || SKIP_XOR || SKIP_PERMUT || !USE_USE_MODE_XPX || !USE_MODE_CBC
+    puts("THIS IS A TESTING VERSION **UNFIT** FOR PRODUCTION USE!");
+    puts("*** PARTS OF THE IMPORTANT CODE ARE DISABLED! ***\n");
     puts("If you are not in the inner circle of testers, please do not use this\n"
          "piece of software.");
 #elif ALPHA
@@ -251,6 +252,7 @@ int main(int argc, char **argv)
     int opt;
     char *parm = "1024,1,1";
     int eflag = 1;
+    int multithreading = 0;
     int delflag;
     char fnmode = 'n';
     unsigned *binparm;
@@ -266,7 +268,7 @@ int main(int argc, char **argv)
     /* GNU: */
     /* + means: parse POSIXLY_CORRECT, stopping with the first non-option */
     /* - means: give opt==1 for any non-option parameter */
-    while((opt = getopt(argc, argv, "+hVO:drRnvP:")) != -1)
+    while((opt = getopt(argc, argv, "+hVO:drRnvP:m")) != -1)
     {
         switch(opt) 
         {
@@ -300,6 +302,9 @@ int main(int argc, char **argv)
                     abort();
                 }
                 break;
+            case 'm':
+                multithreading = 1;
+                break;
             case 1:
                 abort();   /* there shouldn't be unhandled parameters here */
             case 'h':
@@ -314,7 +319,8 @@ int main(int argc, char **argv)
                       "\t\t-R\t\treplace input file (dangerous!)\n"
                       "\t\t-n\t\tname output file as infile.{dec|enc} (default)\n"
                       "\t\t-v\t\tincrease verbosity\n"
-                      "\t\t-P passphrase\n", stdout);
+                      "\t\t-P passphrase\n"
+                      "\t\t-m\t\tenable multithreading\n", stdout);
                 return 1;
         }
     }
@@ -386,7 +392,7 @@ int main(int argc, char **argv)
             default:
                 abort();
         }
-        r = peng_cmd_process(&mypce, infn, outfn);
+        r = peng_cmd_process(&mypce, infn, outfn, multithreading);
         if(r<0)
         {
             /* perror(argv[i]); <<< this is done in the process */

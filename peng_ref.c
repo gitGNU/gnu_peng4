@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <alloca.h>
 #include <string.h>
+#include <pthread.h>
 
 #include "mt19937ar.h"
 #include "peng_ref.h"
@@ -247,62 +248,126 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
 }
 
 
-void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt)
+struct epp_thr_context
 {
-    int i,j;
-    unsigned off;
+    struct pengset    **mtx;
+    unsigned            rounds;
+    unsigned            blksize;
+    unsigned char      *buf1;
+    unsigned char      *tmpbuf;
+    unsigned char      *buf2;
+    char encrypt;
 #if USE_MODE_CBC
-    unsigned char *lastbuf = alloca(p->blksize);
-    unsigned char *lastbuftmp = alloca(p->blksize);
-    
-    memcpy(lastbuf, p->iv, p->blksize);
+    unsigned char      *iv;
 #endif
+};
+
+
+static void *epp_thr(void *param)
+{
+    int j;
+    struct epp_thr_context *c = (struct epp_thr_context *) param;
+    
+#if USE_MODE_CBC
+    unsigned char *lastbuf = alloca(c->blksize);
+    unsigned char *lastbuftmp = alloca(c->blksize);
+    
+    memcpy(lastbuf, c->iv, c->blksize);
+#endif
+
+#if USE_MODE_CBC
+    if(c->encrypt)
+    {
+        memxor(c->buf1, lastbuf, c->blksize);
+    }
+    else
+    {
+        memcpy(lastbuftmp, c->buf1, c->blksize);
+    }
+#endif
+    if(c->encrypt)
+        for(j=0; j<c->rounds; j++)
+        {
+            execpengset(c->mtx[j], c->buf1, c->tmpbuf, c->buf2, c->encrypt);
+            /* copy buf2 back to buf1 */
+            if(j<c->rounds-1)
+            {
+                memcpy(c->buf1, c->buf2, c->blksize);
+            }
+        }
+    else
+        for(j=c->rounds-1; j>=0; j--)
+        {
+            execpengset(c->mtx[j], c->buf1, c->tmpbuf, c->buf2, c->encrypt);
+            /* copy buf2 back to buf1 */
+            if(j>0)
+            {
+                memcpy(c->buf1, c->buf2, c->blksize);
+            }
+        }
+#if USE_MODE_CBC
+    if(!c->encrypt)
+    {
+        memxor(c->buf2, lastbuf, c->blksize);
+        memcpy(lastbuf, lastbuftmp, c->blksize);
+    }
+    else
+    {
+        memcpy(lastbuf, c->buf2, c->blksize);
+    }
+#endif
+    return NULL;
+}
+
+
+void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt, char threads_flag)
+{
+    int i,r;
+    unsigned off;
+    struct epp_thr_context *ctx;
+    pthread_t *pthr = alloca(p->variations*sizeof(pthread_t));
     
     for(i=0; i<p->variations; i++)
     {
         off = i*p->blksize;
+        ctx = MALLOC(sizeof(struct epp_thr_context));
+        memset(ctx, 0, sizeof(struct epp_thr_context));
+        
+        ctx->mtx = p->mtx[i];
+        ctx->rounds = p->rounds;
+        ctx->blksize = p->blksize;
+        ctx->buf1 = buf1+off;
+        ctx->tmpbuf = tmpbuf+off;
+        ctx->buf2 = buf2+off;
+        ctx->encrypt = encrypt;
 #if USE_MODE_CBC
-        if(encrypt)
-        {
-            memxor(buf1+off, lastbuf, p->blksize);
-        }
-        else
-        {
-            memcpy(lastbuftmp, buf1+off, p->blksize);
-        }
+        ctx->iv = p->iv;
 #endif
-        if(encrypt)
-            for(j=0; j<p->rounds; j++)
-            {
-                execpengset(p->mtx[i][j], buf1+off, tmpbuf, buf2+off, encrypt);
-                /* copy buf2 back to buf1 */
-                if(j<p->rounds-1)
-                {
-                    memcpy(buf1+off, buf2+off, p->blksize);
-                }
-            }
-        else
-            for(j=p->rounds-1; j>=0; j--)
-            {
-                execpengset(p->mtx[i][j], buf1+off, tmpbuf, buf2+off, encrypt);
-                /* copy buf2 back to buf1 */
-                if(j>0)
-                {
-                    memcpy(buf1+off, buf2+off, p->blksize);
-                }
-            }
-#if USE_MODE_CBC
-        if(!encrypt)
+        
+        if(!threads_flag)
         {
-            memxor(buf2+off, lastbuf, p->blksize);
-            memcpy(lastbuf, lastbuftmp, p->blksize);
+            epp_thr(&ctx);
         }
         else
         {
-            memcpy(lastbuf, buf2+off, p->blksize);
+            r = pthread_create(&pthr[i], NULL, epp_thr, &ctx);
+            if(r)
+            {
+                perror("thread creation");
+                abort();
+            }
         }
-#endif
     }
+    if(threads_flag)
+        for(i=0; i<p->variations; i++)
+        {
+            r = pthread_join(pthr[i], NULL);
+            if(r)
+            {
+                perror("thread joining");
+                abort();
+            }
+        }
 }
 
 

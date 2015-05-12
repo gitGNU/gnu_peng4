@@ -1,10 +1,12 @@
-DEFS = -DDORKY=0 -DSKIP_XOR=0 -DSKIP_PERMUT=0 -DDEBUG=0 -DBETA=1 -DALPHA=1 \
+DEFS = -DDORKY=0 -DSKIP_XOR=0 -DSKIP_PERMUT=0 -DDEBUG=0 -DBETA=1 -DALPHA=0 \
  -DUSE_MODE_XPX=1 -DUSE_MODE_CBC=1 -DSEMIDORKY=0
 
-CFLAGS = -O2 -Wall -Wno-pointer-sign -std=c90 -ggdb -D_GNU_SOURCE \
- -Iexternal/ -Lexternal/
-#CFLAGS = -ggdb -Wall -Wno-pointer-sign -std=c90 -ggdb -D_GNU_SOURCE \
+#CFLAGS = -O3 -Wall -Wno-pointer-sign -std=c90 -D_GNU_SOURCE \
 # -Iexternal/ -Lexternal/
+CFLAGS = -ggdb -Wall -Wno-pointer-sign -std=c90 -ggdb -D_GNU_SOURCE \
+ -Iexternal/ -Lexternal/
+
+LIBS = -pthread
 
 SOURCES= external/whirlpool.c external/mt19937ar.c \
  peng_ref.c peng.c peng_misc.c
@@ -18,10 +20,10 @@ EXTRA= TODO README LICENSE CHANGELOG
 all: peng countbits
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) $(DEFS) $< -o $@
+	$(CC) -c $(CFLAGS) $(DEFS) $< -o $@ $(LIBS)
 
 peng: $(TARGETS)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(DEFS) -o peng $(TARGETS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(DEFS) -o peng $(TARGETS) $(LIBS)
 
 countbits: countbits.c
 	$(CC) $(CFLAGS) -o countbits countbits.c

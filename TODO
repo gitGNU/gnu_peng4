@@ -1,10 +1,15 @@
+
+ * negative offset of EOF marker
+
 COMPATIBILITY
  * byte order (alignment?)
  * block encryption API (for things like TrueCrypt or dm-crypt)
  * exported API (libpeng)
+ * make levels of dorkiness (dorkicity)
 
 OPTIMIZATION
- * threads (variations in parallel)
+ * multithreading (variations in parallel)
+ * offset initialization for thread's Mersenne Twister
  * bit ordering
 
 LUXURY
@@ -25,6 +30,7 @@ SECURITY (MINOR)
 
 TEST
  * automated test
+ * test 3 byte length difference problem
 
 
  

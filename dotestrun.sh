@@ -14,7 +14,7 @@ TESTFILE=testfile
 
 cp $TESTSOURCE $TESTFILE
 
-$PROXY ./peng -n -O $PARM $V -P blablaBLOEBLOE $TESTFILE
+$PROXY ./peng -n -m -O $PARM $V -P blablaBLOEBLOE $TESTFILE
 #cp ${TESTFILE}.enc ${TESTFILE}_dec_3
 cp ${TESTFILE}.enc ${TESTFILE}_dec_2
 cp ${TESTFILE}.enc ${TESTFILE}_dec_1
