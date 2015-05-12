@@ -15,7 +15,7 @@
 #include "peng_ref.h"
 
 
-const char *peng_version = "4.01.00.0039"; /* CHANGEME */
+const char *peng_version = "4.01.00.0040"; /* CHANGEME */
 
 
 const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };
@@ -149,9 +149,9 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         {
             /* Find the EOF marker.
              */
-            /* z = locrr(pce->buf3, k, eof_magic, sizeof eof_magic / sizeof eof_magic[0], 3);  */ /* TODO */
-            /* if(z>=0)
-                k = z; */
+            z = locrr(pce->buf3, k, eof_magic, sizeof eof_magic / sizeof eof_magic[0], 3);  /* TODO */
+            if(z>=0)
+                k = z;
         }
         
         j = write(h2, pce->buf3, k);

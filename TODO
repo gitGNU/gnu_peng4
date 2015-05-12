@@ -1,5 +1,5 @@
-
- * negative offset of EOF marker
+BUGS
+ * allow negative offset of EOF marker
 
 COMPATIBILITY
  * byte order (alignment?)
@@ -8,7 +8,6 @@ COMPATIBILITY
  * make levels of dorkiness (dorkicity)
 
 OPTIMIZATION
- * multithreading (variations in parallel)
  * offset initialization for thread's Mersenne Twister
  * bit ordering
 
@@ -45,4 +44,5 @@ DONE
  X padding in peng_cmd_process()
  X verbosity>2 displays keys
  X shorten files (may fail if length difference < 3)
+ X multithreading (variations in parallel)
 

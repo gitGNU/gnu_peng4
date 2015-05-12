@@ -346,11 +346,11 @@ void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf
         
         if(!threads_flag)
         {
-            epp_thr(&ctx);
+            epp_thr(ctx);
         }
         else
         {
-            r = pthread_create(&pthr[i], NULL, epp_thr, &ctx);
+            r = pthread_create(&pthr[i], NULL, epp_thr, ctx);
             if(r)
             {
                 perror("thread creation");
@@ -368,6 +368,7 @@ void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf
                 abort();
             }
         }
+    FREE(ctx);
 }
 
 
