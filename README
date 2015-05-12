@@ -31,7 +31,9 @@ http://www.fourmilab.ch/random/
 
 http://www.phy.duke.edu/~rgb/General/dieharder.php
 
-$ ent ur_testfile 
+Some entropy measurements with ent:
+
+$ ent urandom_testfile 
 Entropy = 7.999997 bits per byte.
 
 Optimum compression would reduce the size

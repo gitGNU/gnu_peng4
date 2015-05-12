@@ -87,7 +87,7 @@ unsigned do_padding(void *buf0, unsigned sz0, const unsigned long *marker, unsig
 
 
 /* TODO: byte order */
-unsigned locrr(void *buf, unsigned sz, const unsigned long *marker, unsigned nmarker, int minmatch)
+int locrr(void *buf, unsigned sz, const unsigned long *marker, unsigned nmarker, int minmatch)
 {
     int pos = (int)sz-minmatch, n;
     
@@ -100,6 +100,15 @@ unsigned locrr(void *buf, unsigned sz, const unsigned long *marker, unsigned nma
         if(!mymemcmp(buf+pos, marker, n))
             return pos;
     }
-    return -1;
+    /* now we try to find tails at pos=0 */
+    n=1;
+    for(n=1; nmarker-n>minmatch; n++)
+    {
+        if(!mymemcmp(buf, marker+n, nmarker-n))
+        {
+            return -n;
+        }
+    }
+    return -10000;  /* sigh, some number implausibly large and negative */
 }
 

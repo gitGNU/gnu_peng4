@@ -20,6 +20,9 @@ DOCUMENTATION
 
 DEBUG
  * debug system (flags)
+ * get rid of abort()
+ * get rid of option -m (multithreading)
+ * get rid of testing defines
 
 QUESTIONABLE
  * review q2c()

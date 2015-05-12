@@ -15,13 +15,14 @@
 #include "peng_ref.h"
 
 
-const char *peng_version = "4.01.00.0041"; /* CHANGEME */
+const char *peng_version = "4.01.00.0042"; /* CHANGEME */
 
 
 const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };
 
 
-#define MAXFNLEN 1024
+#define MAXFNLEN              1024
+#define MIN_LOCRR_SEQ_LEN        8
 
 
 /* global */ int verbosity = 0;
@@ -74,8 +75,8 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned 
 int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const char *outfn, char multithreading)
 {
     int h1, h2;
-    int i,j,k,z;
-    int guess_eof = 0;
+    int i,j,k,r,z;
+    int guess_eof = 0, truncate_at = 0;
     unsigned num=0, padding_remaining=0;
     unsigned long long total, pos=0;
     
@@ -149,9 +150,19 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         {
             /* Find the EOF marker.
              */
-            z = locrr(pce->buf3, k, eof_magic, sizeof eof_magic / sizeof eof_magic[0], 3);  /* TODO */
-            if(z>=0)
-                k = z;
+            z = locrr(pce->buf3, k, eof_magic, sizeof eof_magic / sizeof eof_magic[0], MIN_LOCRR_SEQ_LEN);
+            if(z>=-9999)   /* legal value */
+            {
+                if(z>=0)
+                    k = z;
+                else
+                {
+                    /* z is negative and valid, that means the start of the marker was in the previous block */
+                    k = 0;
+                    truncate_at = z;
+                    break;
+                }
+            }
         }
         
         j = write(h2, pce->buf3, k);
@@ -167,7 +178,19 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
         if(guess_eof)
             break;    /* this is to avoid some tricky problems (with growing files) */
     }
-    
+    /* if(!pce->eflag && guess_eof && k==0 && z<0 && z>=-9999) */
+    if(truncate_at)
+    {
+        pos = lseek(h2, 0, SEEK_CUR);
+        lseek(h2, 0, SEEK_SET);
+        r = ftruncate(h2, pos-truncate_at);
+        if(r)
+        {
+            perror(outfn);
+            return -1;
+        }
+    }
+    else
     if(padding_remaining)  /* encrypting */
     {
         do_padding(pce->buf1, pce->bufsize, eof_magic, sizeof eof_magic / sizeof eof_magic[0], padding_remaining);
