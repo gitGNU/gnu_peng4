@@ -39,8 +39,8 @@ test:
 ##############################################################################
 
 ci: clean
-	./updver.py
-	git add *.c *.h Makefile $(EXTRA) *.sh *.py external/*.c external/*.h
+	./scripts/updver.py
+	git add *.c *.h Makefile $(EXTRA) scripts/* external/*
 	git ci
 
 keywords:

@@ -15,7 +15,7 @@
 #include "peng_ref.h"
 
 
-const char *peng_version = "4.01.00.0042"; /* CHANGEME */
+const char *peng_version = "4.01.00.0043"; /* CHANGEME */
 
 
 const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };

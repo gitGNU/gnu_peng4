@@ -32,7 +32,6 @@ SECURITY (MINOR)
 
 TEST
  * automated test
- * test 3 byte length difference problem
 
 
  
@@ -48,4 +47,5 @@ DONE
  X verbosity>2 displays keys
  X shorten files (may fail if length difference < 3)
  X multithreading (variations in parallel)
+ X test n byte length difference problem
 
