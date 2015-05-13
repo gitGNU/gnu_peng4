@@ -52,5 +52,5 @@ push:
 ##############################################################################
 
 tarball:
-	tar -cjf peng4-$(shell ./getver.sh).tar.bz2 $(SOURCES) $(EXTRA) *.sh *.py
+	tar -cjf peng4-$(shell ./scripts/getver.sh).tar.bz2 $(EXTRA) *.c *.h scripts/* external/* docs/*
 
