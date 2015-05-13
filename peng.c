@@ -1,3 +1,21 @@
+/*
+    PENG - A Permutation Engine
+    Copyright (C) 1998-2015 by Klaus-J. Wolf
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or   
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of 
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the  
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 
 #include <stdio.h>
 #include <stdint.h>
@@ -15,7 +33,10 @@
 #include "peng_ref.h"
 
 
-const char *peng_version = "4.01.00.0043"; /* CHANGEME */
+#define LICENSE "This program comes with ABSOLUTELY NO WARRANTY.\nLicensed under the GNU Public License version 3 or later.\n"
+
+
+const char *peng_version = "4.01.00.0045"; /* CHANGEME */
 
 
 const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };
@@ -225,7 +246,12 @@ void peng_cmd_unprep(struct peng_cmd_environment *pce)
 
 void printversion(void)
 {
-#if DORKY || SEMIDORKY || SKIP_XOR || SKIP_PERMUT || !USE_USE_MODE_XPX || !USE_MODE_CBC
+#if ALPHA || BETA || DEBUG
+    printf("DORKY=%d SEMIDORKY=%d SKIP_XOR=%d SKIP_PERMUT=%d USE_MODE_XPX=%d USE_MODE_CBC=%d\n",
+           DORKY, SEMIDORKY, SKIP_XOR, SKIP_PERMUT, USE_MODE_XPX, USE_MODE_CBC);
+    printf("DEBUG=%d\n", DEBUG);
+#endif
+#if DORKY || SEMIDORKY || SKIP_XOR || SKIP_PERMUT || !USE_MODE_XPX || !USE_MODE_CBC
     puts("THIS IS A TESTING VERSION **UNFIT** FOR PRODUCTION USE!");
     puts("*** PARTS OF THE IMPORTANT CODE ARE DISABLED! ***\n");
     puts("If you are not in the inner circle of testers, please do not use this\n"
@@ -240,6 +266,7 @@ void printversion(void)
     puts("This is a version with DEBUG compiled in.  Do not expect optimum performance.");
 #endif
     printf("PENG Version %s, (C)1998-2015 by Klaus-J. Wolf\n", peng_version);
+    puts(LICENSE);
 }
 
 
