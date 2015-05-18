@@ -35,3 +35,5 @@ void memxor(void *dst0, const void *src0, unsigned sz0);
 unsigned do_padding(void *buf0, unsigned sz0, const unsigned long *marker, unsigned nmarker, unsigned marker_byteoffset);
 
 int locrr(void *buf, unsigned sz, const unsigned long *marker, unsigned nmarker, int minmatch);
+
+unsigned countconsecutivezeros(void *buf0, unsigned sz);

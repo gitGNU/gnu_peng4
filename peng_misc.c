@@ -130,3 +130,22 @@ int locrr(void *buf, unsigned sz, const unsigned long *marker, unsigned nmarker,
     return -10000;  /* sigh, some number implausibly large and negative */
 }
 
+
+unsigned countconsecutivezeros(void *buf0, unsigned sz)
+{
+    register unsigned char *buf = (unsigned char *)buf0;
+    unsigned res=0;
+    unsigned c=0;
+    
+    while(sz--)
+    {
+        if(!*buf++)
+            c++;
+        else
+            if(c>res)
+                res=c;
+    }
+    if(c>res)
+        res=c;
+    return res;
+}

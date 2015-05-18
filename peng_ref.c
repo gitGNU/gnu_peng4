@@ -341,30 +341,32 @@ void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf
     struct epp_thr_context *ctx;
     pthread_t *pthr = alloca(p->variations*sizeof(pthread_t));
     
+    /* alloca() shouldn't work here */
+    ctx = MALLOC(p->variations*sizeof(struct epp_thr_context));
+    memset(ctx, 0, p->variations*sizeof(struct epp_thr_context));
+    
     for(i=0; i<p->variations; i++)
     {
         off = i*p->blksize;
-        ctx = MALLOC(sizeof(struct epp_thr_context));
-        memset(ctx, 0, sizeof(struct epp_thr_context));
         
-        ctx->mtx = p->mtx[i];
-        ctx->rounds = p->rounds;
-        ctx->blksize = p->blksize;
-        ctx->buf1 = buf1+off;
-        ctx->tmpbuf = tmpbuf+off;
-        ctx->buf2 = buf2+off;
-        ctx->encrypt = encrypt;
+        ctx[i].mtx = p->mtx[i];
+        ctx[i].rounds = p->rounds;
+        ctx[i].blksize = p->blksize;
+        ctx[i].buf1 = buf1+off;
+        ctx[i].tmpbuf = tmpbuf+off;
+        ctx[i].buf2 = buf2+off;
+        ctx[i].encrypt = encrypt;
 #if USE_MODE_CBC
-        ctx->iv = p->iv;
+        ctx[i].iv = p->iv;
 #endif
         
         if(!threads_flag)
         {
-            epp_thr(ctx);
+            epp_thr(&ctx[i]);
         }
         else
         {
-            r = pthread_create(&pthr[i], NULL, epp_thr, ctx);
+            r = pthread_create(&pthr[i], NULL, epp_thr, &ctx[i]);
             if(r)
             {
                 perror("thread creation");

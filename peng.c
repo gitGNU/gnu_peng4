@@ -36,7 +36,7 @@
 #define LICENSE "This program comes with ABSOLUTELY NO WARRANTY.\nLicensed under the GNU Public License version 3 or later.\n"
 
 
-const char *peng_version = "4.01.00.0048"; /* CHANGEME */
+const char *peng_version = "4.01.00.0050"; /* CHANGEME */
 
 
 const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };
@@ -174,6 +174,8 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const c
             z = locrr(pce->buf3, k, eof_magic, sizeof eof_magic / sizeof eof_magic[0], MIN_LOCRR_SEQ_LEN);
             if(z>=-9999)   /* legal value */
             {
+                if(verbosity>1)
+                    fprintf(stderr, "applying guess_eof at z=%d\n", z);
                 if(z>=0)
                     k = z;
                 else
