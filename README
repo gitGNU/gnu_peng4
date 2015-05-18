@@ -13,6 +13,9 @@ gets XORed, permutated and XORed again, with each round, and a CBC block cipher
 mode of operation is applied.  Different sets (called "variations") are applied
 in proper order.
 
+Klaus-Juergen Wolf <yanestra !at! users !dot! sf !dot! net>
+2015-05-18
+
 Algorithms used:
 
 MT19937
