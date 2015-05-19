@@ -4,6 +4,7 @@ BUGS
 COMPATIBILITY
  * byte order (alignment?)
  * block encryption API (for things like TrueCrypt or dm-crypt)
+ * l(ib)peng: no output to stderr
 
 OPTIMIZATION
  * offset initialization for thread's Mersenne Twister (when generating mtx)

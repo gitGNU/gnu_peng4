@@ -28,7 +28,7 @@
 #include <alloca.h>
 #include <string.h>
 
-#include "peng_glob.h"
+#include "peng_misc.h"
 #include "whirlpool.h"
 #include "mt19937ar.h"
 #include "peng_ref.h"
@@ -38,14 +38,11 @@
 #define LICENSE "This program comes with ABSOLUTELY NO WARRANTY.\nLicensed under the GNU Public License version 3 or later.\n"
 
 
-const char *peng_version = "4.01.0056"; /* CHANGEME */
+const char *peng_version = "4.01.0057"; /* CHANGEME */
 
 
 #define MAXFNLEN              1024
 #define MIN_LOCRR_SEQ_LEN        8
-
-
-/* global */ int verbosity = 0;
 
 
 void printversion(void)

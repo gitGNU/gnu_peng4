@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "peng_glob.h"
+#include "peng_misc.h"
 
 
 void *chkmalloc(unsigned x)

@@ -30,7 +30,8 @@
 
 #include "mt19937ar.h"
 #include "peng_ref.h"
-#include "peng_glob.h"
+#include "peng_misc.h"
+#include "lpeng.h"
 
 
 #ifndef DORKINESS
@@ -284,8 +285,8 @@ static void *epp_thr(void *param)
     struct epp_thr_context *c = (struct epp_thr_context *) param;
     
 #if USE_MODE_CBC
-    unsigned char *lastbuf = alloca(c->blksize);
-    unsigned char *lastbuftmp = alloca(c->blksize);
+    unsigned char *lastbuf = MALLOCA(c->blksize);
+    unsigned char *lastbuftmp = MALLOCA(c->blksize);
     
     memcpy(lastbuf, c->iv, c->blksize);
 #endif
@@ -330,6 +331,8 @@ static void *epp_thr(void *param)
     {
         memcpy(lastbuf, c->buf2, c->blksize);
     }
+    FREEA(lastbuf);
+    FREEA(lastbuftmp);
 #endif
     return NULL;
 }
@@ -340,7 +343,7 @@ void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf
     int i,r;
     unsigned off;
     struct epp_thr_context *ctx;
-    pthread_t *pthr = alloca(p->variations*sizeof(pthread_t));
+    pthread_t *pthr = MALLOCA(p->variations*sizeof(pthread_t));
     
     /* alloca() shouldn't work here */
     ctx = MALLOC(p->variations*sizeof(struct epp_thr_context));
@@ -386,6 +389,7 @@ void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf
             }
         }
     FREE(ctx);
+    FREEA(pthr);
 }
 
 

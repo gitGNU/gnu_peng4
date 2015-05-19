@@ -26,9 +26,12 @@
 
 #include "whirlpool.h"
 #include "mt19937ar.h"
-#include "peng_glob.h"
+#include "peng_misc.h"
 #include "peng_ref.h"
 #include "lpeng.h"
+
+
+/* global */ int verbosity = 0;
 
 
 const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };

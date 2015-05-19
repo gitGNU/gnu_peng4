@@ -12,7 +12,7 @@ set -e
 PARM=7276,19,19
 V=-vv
 
-TESTSOURCE=testdata/c_64mib
+TESTSOURCE=testdata/h_128mib
 TESTFILE=testfile
 
 cp $TESTSOURCE $TESTFILE

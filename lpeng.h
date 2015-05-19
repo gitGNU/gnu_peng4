@@ -18,6 +18,9 @@
 */
 
 
+extern int verbosity;
+
+
 struct peng_cmd_environment
 {
     struct pengpipe *pp;
