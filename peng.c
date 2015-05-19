@@ -25,7 +25,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#if LINUX
 #include <alloca.h>
+#endif
 #include <string.h>
 
 #include "peng_misc.h"
@@ -38,7 +40,7 @@
 #define LICENSE "This program comes with ABSOLUTELY NO WARRANTY.\nLicensed under the GNU Public License version 3 or later.\n"
 
 
-const char *peng_version = "4.01.0057"; /* CHANGEME */
+const char *peng_version = "4.01.0058"; /* CHANGEME */
 
 
 #define MAXFNLEN              1024

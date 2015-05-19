@@ -1,5 +1,5 @@
 DEFS = -DDORKINESS=0 -DSKIP_XOR=0 -DSKIP_PERMUT=0 -DDEBUG=0 -DBETA=1 -DALPHA=0 \
- -DUSE_MODE_XPX=1 -DUSE_MODE_CBC=1
+ -DUSE_MODE_XPX=1 -DUSE_MODE_CBC=1 -DLINUX=1
 
 CFLAGS = -O3 -Wall -Wno-pointer-sign -std=c90 -D_GNU_SOURCE \
  -Iexternal/ -Lexternal/
@@ -13,7 +13,7 @@ SOURCES= external/whirlpool.c external/mt19937ar.c \
 
 TARGETS= $(addsuffix .o, $(basename $(SOURCES)))
 
-EXTRA= TODO README LICENSE CHANGELOG
+EXTRA= TODO README LICENSE CHANGELOG Makefile
 
 ##############################################################################
 
@@ -51,6 +51,6 @@ push: ci
 
 ##############################################################################
 
-tarball:
+tarball: $(SOURCES)
 	./scripts/mktarball.sh peng4-$(shell ./scripts/getver.sh).tar.bz2 $(EXTRA) *.c *.h scripts/* external/* docs/*
 

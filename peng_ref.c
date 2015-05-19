@@ -24,7 +24,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#if LINUX
 #include <alloca.h>
+#endif
 #include <string.h>
 #include <pthread.h>
 
