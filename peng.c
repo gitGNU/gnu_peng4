@@ -38,7 +38,7 @@
 #define LICENSE "This program comes with ABSOLUTELY NO WARRANTY.\nLicensed under the GNU Public License version 3 or later.\n"
 
 
-const char *peng_version = "4.01.0054"; /* CHANGEME */
+const char *peng_version = "4.01.0056"; /* CHANGEME */
 
 
 #define MAXFNLEN              1024
@@ -271,8 +271,10 @@ int main(int argc, char **argv)
             fflush(stdout);
         }
         r = peng_cmd_process(&mypce, infn, h1, total, outfn, h2, multithreading, MIN_LOCRR_SEQ_LEN);
+        
         close(h1);
         close(h2);
+        
         if(r<0)
         {
             /* perror(argv[i]); <<< this is done in the process */
