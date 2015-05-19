@@ -1,3 +1,6 @@
+INTRODUCTION
+============
+
 PENG4 ("Permutation Engine 4") is an implementation of an encryption algorithm 
 based on long-distance bit permutations. It is still experimental. Written in C, 
 it is suprisingly fast on modern computers. Lower performance is partially 
@@ -13,8 +16,37 @@ gets XORed, permutated and XORed again, with each round, and a CBC block cipher
 mode of operation is applied.  Different sets (called "variations") are applied
 in proper order.
 
-Klaus-Juergen Wolf <yanestra !at! users !dot! sf !dot! net>
+Klaus-Juergen Wolf
+yanestra !at! users !dot! sf !dot! net
+yanestra !at! lab6 !dot! seismic !dot! de
 2015-05-18
+
+
+USAGE
+=====
+
+Most important, option -O:
+
+    ./peng -O blocksize,rounds,variations
+
+these are three numerics, the first one being the block size in which the bits
+are permuted.  You may choose any number you want, but the program gets slower
+the bigger the block size is.  The second is the number of rounds, this is the
+number of how many times the X-P-X permutation/encryption process is repeated
+on a single block (with different parameters, of course).  The third is the
+number of variations, meaning the number of blocks on which another cycle of
+permutation/encryption is applied, before the algorithm starts with the first
+one again.
+
+Within a block, the bits are permutated so that the very first bit may land on
+the very last position.
+
+You may want to use option -m if you have a CPU with more than one core (or
+more than one CPU :-).
+
+
+THIRD PARTY SOFTWARE
+====================
 
 Algorithms used:
 
@@ -33,6 +65,10 @@ Public Domain
 http://www.fourmilab.ch/random/
 
 http://www.phy.duke.edu/~rgb/General/dieharder.php
+
+
+QUALITY
+=======
 
 Some entropy measurements with ent:
 

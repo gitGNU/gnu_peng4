@@ -1,5 +1,5 @@
 BUGS
- * allow negative offset of EOF marker
+ * require double password entry on encryption
 
 COMPATIBILITY
  * byte order (alignment?)
@@ -14,6 +14,7 @@ OPTIMIZATION
 LUXURY
  * store parameters with enc file
  * integrity checks
+ * binary tarball
 
 DOCUMENTATION
  * doxygen
@@ -48,4 +49,5 @@ DONE
  X shorten files (may fail if length difference < 3)
  X multithreading (variations in parallel)
  X test n byte length difference problem
+ X allow negative offset of EOF marker
 
