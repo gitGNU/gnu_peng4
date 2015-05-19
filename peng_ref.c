@@ -1,6 +1,7 @@
 /*
     PENG - A Permutation Engine
     Copyright (C) 1998-2015 by Klaus-J. Wolf
+                               yanestra !at! lab6 !dot! seismic !dot! de
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,14 +33,14 @@
 #include "peng_glob.h"
 
 
-#ifndef DORKY
-#define DORKY 1
+#ifndef DORKINESS
+#define DORKINESS 0   /* set 0,1,2 */
 #endif
 #ifndef SKIP_XOR
-#define SKIP_XOR 1
+#define SKIP_XOR 0
 #endif
 #ifndef SKIP_PERMUT
-#define SKIP_PERMUT 1
+#define SKIP_PERMUT 0
 #endif
 
 #if DEBUG
@@ -97,7 +98,7 @@ struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt)
     
     for(i=0; i<blksize8; i++)
     {
-#if DORKY
+#if DORKINESS>1
         j = mersennetwister_genrand_int32(mt) % blksize8;
         /* this is dorky, but it speeds things up a lot */
         while(tempflg1[j])
@@ -106,7 +107,7 @@ struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt)
         /* this is dorky, but it speeds things up a lot */
         while(tempflg2[k])
             k = (k+1)%blksize8;
-#elif SEMIDORKY
+#elif DORKINESS==1
         do
             j = mersennetwister_genrand_int32(mt) % blksize8;
         while(tempflg1[j]);

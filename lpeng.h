@@ -18,49 +18,16 @@
 */
 
 
-#include <stdio.h>
-
-
-unsigned bytebits(int c)
+struct peng_cmd_environment
 {
-    register unsigned n=0;
-    
-    if(c&1) n++;
-    if(c&2) n++;
-    if(c&4) n++;
-    if(c&8) n++;
-    if(c&0x10) n++;
-    if(c&0x20) n++;
-    if(c&0x40) n++;
-    if(c&0x80) n++;
-    return n;
-}
+    struct pengpipe *pp;
+    struct mersennetwister mt;
+    unsigned char *buf1, *buf2, *buf3;
+    unsigned blksize, bufsize;
+    int eflag;
+};
 
 
-int main(int argc, const char *argv[])
-{
-    unsigned long long num;
-    int i, c;
-    FILE *f;
-
-    for(i=1; i<argc; i++)
-    {
-        num = 0;
-        f=fopen(argv[i], "r");
-        if(f==NULL)
-        {
-            perror(argv[i]);
-            continue;
-        }
-        for(;;)
-        {
-            c = fgetc(f);
-            if(c==EOF)
-                break;
-            num += bytebits(c);
-        }
-        fclose(f);
-        printf("%s: %llu\n", argv[i], num);
-    }
-    return 0;
-}
+void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned rounds, unsigned variations, char *passphrase, int eflag);
+int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, unsigned long long total, const char *outfn, int outh, char multithreading, char min_locrr_seq_len);
+void peng_cmd_unprep(struct peng_cmd_environment *pce);

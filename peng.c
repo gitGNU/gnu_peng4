@@ -1,6 +1,7 @@
 /*
     PENG - A Permutation Engine
     Copyright (C) 1998-2015 by Klaus-J. Wolf
+                            yanestra !at! lab6 !dot! seismic !dot! de
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,15 +32,13 @@
 #include "whirlpool.h"
 #include "mt19937ar.h"
 #include "peng_ref.h"
+#include "lpeng.h"
 
 
 #define LICENSE "This program comes with ABSOLUTELY NO WARRANTY.\nLicensed under the GNU Public License version 3 or later.\n"
 
 
-const char *peng_version = "4.01.0053"; /* CHANGEME */
-
-
-const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };
+const char *peng_version = "4.01.0054"; /* CHANGEME */
 
 
 #define MAXFNLEN              1024
@@ -49,211 +48,14 @@ const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0x
 /* global */ int verbosity = 0;
 
 
-struct peng_cmd_environment
-{
-    struct pengpipe *pp;
-    struct mersennetwister mt;
-    unsigned char *buf1, *buf2, *buf3;
-    unsigned blksize, bufsize;
-    int eflag;
-};
-
-
-/* attention ! passphrase will be erased ! */
-void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned rounds, unsigned variations, char *passphrase, int eflag)
-{
-    struct whirlpool wp;
-    unsigned char digest[WHIRLPOOL_DIGESTBYTES];
-    
-    whirlpool_init(&wp);
-    whirlpool_add(&wp, (unsigned char *) passphrase, strlen(passphrase)*8);
-    whirlpool_finalize(&wp, digest);
-
-    if(verbosity>2)
-    {
-        /* printf("passphrase = %s\n", passphrase); */
-        printf("whirlpool = %s\n", whirlpool_hexhash(&wp));
-        fflush(stdout);
-    }
-    
-    mersennetwister_init_by_array(&pce->mt, (unsigned long *)digest, WHIRLPOOL_DIGESTBYTES/sizeof(unsigned long));  /* TODO byte order, packing */
-    
-    pce->pp = genpengpipe(blksize, rounds, variations, &pce->mt);
-    pce->blksize = blksize;    /* again, this is the third time this value is stored (in variants) */
-    pce->bufsize = getbufsize(pce->pp);
-    pce->eflag = eflag?1:0;
-    
-    pce->buf1 = MALLOC(pce->bufsize);
-    pce->buf2 = MALLOC(pce->bufsize);
-    pce->buf3 = MALLOC(pce->bufsize);
-    
-    memset(passphrase, 0, strlen(passphrase));
-    memset(&wp, 0, sizeof wp);
-    memset(digest, 0, WHIRLPOOL_DIGESTBYTES);
-}
-
-
-int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, const char *outfn, char multithreading)
-{
-    int h1, h2;
-    int i,j,k,r,z;
-    int guess_eof = 0, truncate_at = 0;
-    unsigned num=0, padding_remaining=0;
-    unsigned long long total, pos=0;
-    
-    h1 = open(infn, O_RDONLY);
-    if(h1<0)
-    {
-        perror(infn);
-        return -1;
-    }
-    h2 = open(outfn, O_WRONLY|O_CREAT|O_TRUNC, 0600);
-    if(h2<0)
-    {
-        perror(outfn);
-        close(h1);
-        return -1;
-    }
-    
-    total = lseek(h1, 0, SEEK_END);
-    lseek(h1, 0, SEEK_SET);
-    
-    if(verbosity>0)
-    {
-        printf("%30s   -%c->    %-30s\n", infn, pce->eflag ? 'e':'d', outfn);
-        fflush(stdout);
-    }
-    for(;;)
-    {
-        if(verbosity>1)
-        {
-            printf("block #%u\r", ++num);
-            fflush(stdout);
-        }
-        
-        /* memset(pce->buf1, 0, pce->bufsize); */
-        i = read(h1, pce->buf1, pce->bufsize);
-        if(i<0)
-        {
-            perror(infn);
-            return -1;
-        }
-        
-        if(i<=0)
-            break;
-        
-        pos += i;
-        if(total>0 && pos>=total)
-            guess_eof = 1;
-        
-        if(pce->eflag && i<pce->bufsize)
-        {
-            /* Pad buffer with random data and mark EOF.
-             * special case: the input file matches the block size exactly; then:
-             * do NOT use a EOF magic
-             */
-            padding_remaining = do_padding(pce->buf1+i, pce->bufsize-i, eof_magic, sizeof eof_magic / sizeof eof_magic[0], 0);
-        }
-        
-        if(!pce->eflag && i<pce->bufsize)
-        {
-            fprintf(stderr, "warning: %s: expected a full block while reading for decryption\n", outfn);
-        }
-        
-        /* memset(pce->buf2, 0, pce->bufsize); */
-        /* memset(pce->buf3, 0, pce->bufsize); */
-        /* execpengset(ps, buf1, buf2, buf3, eflag); */
-        execpengpipe(pce->pp, pce->buf1, pce->buf2, pce->buf3, pce->eflag, multithreading);
-        
-        k = pce->eflag?(pce->bufsize):i;
-        
-        if(!pce->eflag && guess_eof)
-        {
-            /* Find the EOF marker.
-             */
-            z = locrr(pce->buf3, k, eof_magic, sizeof eof_magic / sizeof eof_magic[0], MIN_LOCRR_SEQ_LEN);
-            if(z>=-9999)   /* legal value */
-            {
-                if(verbosity>1)
-                    fprintf(stderr, "applying guess_eof at z=%d\n", z);
-                if(z>=0)
-                    k = z;
-                else
-                {
-                    /* z is negative and valid, that means the start of the marker was in the previous block */
-                    k = 0;
-                    truncate_at = z;
-                    break;
-                }
-            }
-        }
-        
-        j = write(h2, pce->buf3, k);
-        if(j<0)
-        {
-            perror(outfn);
-            return -1;
-        }
-        if(k!=j)
-        {
-            fprintf(stderr, "warning: %s: bytes buffered not equal bytes written\n", outfn);
-        }
-        if(guess_eof)
-            break;    /* this is to avoid some tricky problems (with growing files) */
-    }
-    /* if(!pce->eflag && guess_eof && k==0 && z<0 && z>=-9999) */
-    if(truncate_at)
-    {
-        pos = lseek(h2, 0, SEEK_CUR);
-        lseek(h2, 0, SEEK_SET);
-        r = ftruncate(h2, pos-truncate_at);
-        if(r)
-        {
-            perror(outfn);
-            return -1;
-        }
-    }
-    else
-    if(padding_remaining)  /* encrypting */
-    {
-        do_padding(pce->buf1, pce->bufsize, eof_magic, sizeof eof_magic / sizeof eof_magic[0], padding_remaining);
-        execpengpipe(pce->pp, pce->buf1, pce->buf2, pce->buf3, pce->eflag, multithreading);
-        k = pce->bufsize;
-        j = write(h2, pce->buf3, k);
-        if(j<0)
-        {
-            perror(outfn);
-            return -1;
-        }
-        if(k!=j)
-        {
-            fprintf(stderr, "warning: %s: bytes buffered not equal bytes written (fin)\n", outfn);
-        }
-    }
-    
-    close(h1);
-    close(h2);
-    return 0;
-}
-
-
-void peng_cmd_unprep(struct peng_cmd_environment *pce)
-{
-    destroypengpipe(pce->pp);
-    FREE(pce->buf1);
-    FREE(pce->buf2);
-    FREE(pce->buf3);
-}
-
-
 void printversion(void)
 {
 #if ALPHA || BETA || DEBUG
-    printf("DORKY=%d SEMIDORKY=%d SKIP_XOR=%d SKIP_PERMUT=%d USE_MODE_XPX=%d USE_MODE_CBC=%d\n",
-           DORKY, SEMIDORKY, SKIP_XOR, SKIP_PERMUT, USE_MODE_XPX, USE_MODE_CBC);
+    printf("DORKINESS=%d SKIP_XOR=%d SKIP_PERMUT=%d USE_MODE_XPX=%d USE_MODE_CBC=%d\n",
+           DORKINESS, SKIP_XOR, SKIP_PERMUT, USE_MODE_XPX, USE_MODE_CBC);
     printf("DEBUG=%d\n", DEBUG);
 #endif
-#if DORKY || SEMIDORKY || SKIP_XOR || SKIP_PERMUT || !USE_MODE_XPX || !USE_MODE_CBC
+#if DORKINESS>0 || SKIP_XOR || SKIP_PERMUT || !USE_MODE_XPX || !USE_MODE_CBC
     puts("THIS IS A TESTING VERSION **UNFIT** FOR PRODUCTION USE!");
     puts("*** PARTS OF THE IMPORTANT CODE ARE DISABLED! ***\n");
     puts("If you are not in the inner circle of testers, please do not use this\n"
@@ -300,7 +102,7 @@ unsigned *parseints(char *s)
 
 int main(int argc, char **argv)
 {
-    int i,r;
+    int i,r,h1,h2;
     int opt;
     char *parm = "1024,1,1";
     int eflag = 1;
@@ -311,6 +113,7 @@ int main(int argc, char **argv)
     unsigned blksize, rounds, variations;
     struct peng_cmd_environment mypce;
     char *origfn, infn[MAXFNLEN], outfn[MAXFNLEN], *passphrase=NULL;
+    unsigned long long total;
 
     if(argc<=1)
     {
@@ -444,7 +247,32 @@ int main(int argc, char **argv)
             default:
                 abort();
         }
-        r = peng_cmd_process(&mypce, infn, outfn, multithreading);
+        
+        h1 = open(infn, O_RDONLY);
+        if(h1<0)
+        {
+            perror(infn);
+            return -1;
+        }
+        h2 = open(outfn, O_WRONLY|O_CREAT|O_TRUNC, 0600);
+        if(h2<0)
+        {
+            perror(outfn);
+            close(h1);
+            return -1;
+        }
+        
+        total = lseek(h1, 0, SEEK_END);
+        lseek(h1, 0, SEEK_SET);
+        
+        if(verbosity>0)
+        {
+            printf("%30s   -%c->    %-30s\n", infn, eflag ? 'e':'d', outfn);
+            fflush(stdout);
+        }
+        r = peng_cmd_process(&mypce, infn, h1, total, outfn, h2, multithreading, MIN_LOCRR_SEQ_LEN);
+        close(h1);
+        close(h2);
         if(r<0)
         {
             /* perror(argv[i]); <<< this is done in the process */

@@ -4,12 +4,10 @@ BUGS
 COMPATIBILITY
  * byte order (alignment?)
  * block encryption API (for things like TrueCrypt or dm-crypt)
- * exported API (libpeng)
- * make levels of dorkiness (dorkicity)
 
 OPTIMIZATION
- * offset initialization for thread's Mersenne Twister
- * bit ordering
+ * offset initialization for thread's Mersenne Twister (when generating mtx)
+ * bit ordering (just again, but for what?)
 
 LUXURY
  * store parameters with enc file
@@ -21,19 +19,24 @@ DOCUMENTATION
 
 DEBUG
  * debug system (flags)
+ * review MALLOC(), alloca()
  * get rid of abort()
  * get rid of option -m (multithreading)
  * get rid of testing defines
+ * better Makefile concept (maybe cmake?) for generating flavoured bins
+   without need to edit the Makefile
 
 QUESTIONABLE
- * review q2c()
+ * review q2c() [this is simply stupid]
 
 SECURITY (MINOR)
  * erase buffers after use
 
 TEST
- * automated test
+ * automated test (write some tools and create a test parameter table)
 
+PUBLIC
+ * ask for code review
 
  
 ################################################
@@ -41,8 +44,8 @@ TEST
 ################################################
 
 
-
 DONE
+ X exported API (libpeng)
  X CBC(X-P-X)
  X padding in peng_cmd_process()
  X verbosity>2 displays keys
@@ -50,4 +53,4 @@ DONE
  X multithreading (variations in parallel)
  X test n byte length difference problem
  X allow negative offset of EOF marker
-
+ X make levels of dorkiness (dorkicity, dorkision, dorkibility)
