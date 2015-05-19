@@ -1,4 +1,4 @@
-#! /usr/bin/python2
+#! /usr/local/bin/python2
 
 import sys
 
