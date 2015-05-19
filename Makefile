@@ -46,8 +46,8 @@ ci: clean
 keywords:
 	git-keyw-filter *.cc *.hh Makefile
 
-push:
-	git push -u origin master
+push: ci
+	git push savannah
 
 ##############################################################################
 
