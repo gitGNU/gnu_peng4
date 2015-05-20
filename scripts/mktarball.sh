@@ -11,7 +11,7 @@ rm -fr $DIR
 
 if [ "$USER" = "kj" ]
 then
-    if gpg -u D218DF91 -b $ARC
+    if gpg -u 0D1099BA -b $ARC
     then
         scp $ARC* yanestra@dl.sv.gnu.org:/releases/peng4/
     else
