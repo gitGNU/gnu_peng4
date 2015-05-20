@@ -11,8 +11,13 @@ rm -fr $DIR
 
 if [ "$USER" = "kj" ]
 then
- gpg -u D218DF91 -b $ARC || exit 7
- scp $ARC* yanestra@dl.sv.gnu.org:/releases/peng4/
+    if gpg -u D218DF91 -b $ARC
+    then
+        scp $ARC* yanestra@dl.sv.gnu.org:/releases/peng4/
+    else
+        echo '*****' $ARC is prepared
+    fi
+    exit 0
 fi
 
 mv $ARC* tarball

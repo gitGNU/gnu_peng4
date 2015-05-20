@@ -1,0 +1,14 @@
+There are different philosophies where to put "external" executables.
+ * FreeBSD puts them in /usr/local/bin, but
+ * NetBSD puts them in /usr/pkg/bin, and
+ * others place them in /opt or even more exotic places.
+ 
+The official recommendation to use "#! /usr/bin/env ..." leads to semi-
+functional scripts.
+
+From *BSD ports/pkgsrc, we need lang/python27 and shells/bash.
+
+To my knowledge, there is nothing in my scripts that requires python27 over
+python2x (with x<7), but, to my astonishment, *BSD won't install any
+executable named "python2" or "python", so that the path needs to contain
+the revision number.

@@ -40,7 +40,7 @@ test:
 
 ci: clean
 	./scripts/updver.py
-	git add *.c *.h Makefile $(EXTRA) scripts/* external/*
+	git add *.c *.h Makefile $(EXTRA) scripts/*.?? external/*
 	git ci
 
 keywords:
@@ -52,5 +52,6 @@ push: ci
 ##############################################################################
 
 tarball: $(SOURCES)
+	./scripts/000_genbsd_shebang.sh
 	./scripts/mktarball.sh peng4-$(shell ./scripts/getver.sh).tar.bz2 $(EXTRA) *.c *.h scripts/* external/* docs/*
 
