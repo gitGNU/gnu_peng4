@@ -36,3 +36,5 @@ unsigned do_padding(void *buf0, unsigned sz0, const unsigned long *marker, unsig
 int locrr(void *buf, unsigned sz, const unsigned long *marker, unsigned nmarker, int minmatch);
 
 unsigned countconsecutivezeros(void *buf0, unsigned sz);
+
+void rectify(char word2char, void *ptr, int wordsize);

@@ -150,3 +150,10 @@ unsigned countconsecutivezeros(void *buf0, unsigned sz)
         res=c;
     return res;
 }
+
+
+void rectify(char word2char, void *ptr, int wordsize)
+{
+    /* TODO: this is a dummy */
+}
+

@@ -28,6 +28,7 @@
 #include "mt19937ar.h"
 #include "peng_misc.h"
 #include "peng_ref.h"
+#include "sha2.h"
 #include "lpeng.h"
 
 
@@ -37,24 +38,32 @@
 const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };
 
 
+#define COMBINED_DIGEST_SIZE (WHIRLPOOL_DIGESTBYTES+SHA512_DIGEST_SIZE)
+
+
 /* attention ! passphrase will be erased ! */
 void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned rounds, unsigned variations, char *passphrase, int eflag)
 {
     struct whirlpool wp;
+    sha512_ctx sha512;
     unsigned char digest[WHIRLPOOL_DIGESTBYTES];
+    unsigned char digest2[SHA512_DIGEST_SIZE];
+    unsigned char combined[COMBINED_DIGEST_SIZE];
     
     whirlpool_init(&wp);
     whirlpool_add(&wp, (unsigned char *) passphrase, strlen(passphrase)*8);
     whirlpool_finalize(&wp, digest);
-
-    if(verbosity>2)
-    {
-        /* printf("passphrase = %s\n", passphrase); */
-        printf("whirlpool = %s\n", whirlpool_hexhash(&wp));
-        fflush(stdout);
-    }
     
-    mersennetwister_init_by_array(&pce->mt, (unsigned long *)digest, WHIRLPOOL_DIGESTBYTES/sizeof(unsigned long));  /* TODO byte order, packing */
+    sha512_init(&sha512);
+    sha512_update(&sha512, (unsigned char *) passphrase, strlen(passphrase));
+    sha512_final(&sha512, digest2);
+    
+    memcpy(combined, digest, WHIRLPOOL_DIGESTBYTES);
+    memcpy(combined+WHIRLPOOL_DIGESTBYTES, digest2, SHA512_DIGEST_SIZE);
+    
+    rectify(0, combined, sizeof(unsigned long));
+    
+    mersennetwister_init_by_array(&pce->mt, (unsigned long *)combined, COMBINED_DIGEST_SIZE/sizeof(unsigned long));  /* TODO byte order, packing */
     
     pce->pp = genpengpipe(blksize, rounds, variations, &pce->mt);
     pce->blksize = blksize;
