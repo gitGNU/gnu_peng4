@@ -61,7 +61,7 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned 
     memcpy(combined, digest, WHIRLPOOL_DIGESTBYTES);
     memcpy(combined+WHIRLPOOL_DIGESTBYTES, digest2, SHA512_DIGEST_SIZE);
     
-    rectify(0, combined, sizeof(unsigned long));
+    rectify(SYSTEM_BYTEORDER, TARGET_BYTEORDER, combined, COMBINED_DIGEST_SIZE);
     
     mersennetwister_init_by_array(&pce->mt, (unsigned long *)combined, COMBINED_DIGEST_SIZE/sizeof(unsigned long));  /* TODO byte order, packing */
     

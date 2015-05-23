@@ -19,6 +19,8 @@ LUXURY
 DOCUMENTATION
  * doxygen
  * EOF marker warning
+ * unsigned long long etc. -> int(xx)_t or alike (stdint.h seems not be the
+   solution)
 
 DEBUG
  * debug system (flags)

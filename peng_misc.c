@@ -152,8 +152,104 @@ unsigned countconsecutivezeros(void *buf0, unsigned sz)
 }
 
 
-void rectify(char word2char, void *ptr, int wordsize)
+static unsigned long amask(char c)
 {
-    /* TODO: this is a dummy */
+    switch(c)
+    {
+        case '0':
+            return 0x0000000ful;
+        case '1':
+            return 0x000000f0ul;
+        case '2':
+            return 0x00000f00ul;
+        case '3':
+            return 0x0000f000ul;
+        case '4':
+            return 0x000f0000ul;
+        case '5':
+            return 0x00f00000ul;
+        case '6':
+            return 0x0f000000ul;
+        case '7':
+            return 0xf0000000ul;
+    }
+    return 0;
+}
+
+
+static int ashift(char c)
+{
+    switch(c)
+    {
+        case '0':
+            return 0;
+        case '1':
+            return 4;
+        case '2':
+            return 8;
+        case '3':
+            return 12;
+        case '4':
+            return 16;
+        case '5':
+            return 20;
+        case '6':
+            return 24;
+        case '7':
+            return 28;
+    }
+    return 0;
+}
+
+
+static unsigned long doshift(unsigned long v, int n)
+{
+    if(n<0)
+        return v<<(-n);
+    if(n>0)
+        return v>>n;
+    return v;
+}
+
+
+#define REORDER(f,t,i,j) j |= doshift(i&amask(f), ashift(f)-ashift(t));
+
+
+unsigned long byte_reorder(const char *from_order, const char *to_order, unsigned long from, int bytes)
+{
+    unsigned long res = 0;
+    
+    if(!strcmp(from_order,to_order))
+        return from;
+    
+    if(bytes>0) REORDER(from_order[0], to_order[0], from, res)
+    if(bytes>1)  REORDER(from_order[1], to_order[1], from, res)
+    if(bytes>2)  REORDER(from_order[2], to_order[2], from, res)
+    if(bytes>3)  REORDER(from_order[3], to_order[3], from, res)
+    /*
+    if(bytes>3)  REORDER(from_order[4], to_order[4], from, res)
+    if(bytes>4)  REORDER(from_order[5], to_order[5], from, res)
+    if(bytes>5)  REORDER(from_order[6], to_order[6], from, res)
+    if(bytes>6)  REORDER(from_order[7], to_order[7], from, res)
+    */
+
+    printf("rectify: [%d] %08lx -> %08lx\n", sizeof(unsigned long), from, res);
+    
+    return res;
+}
+
+
+
+void rectify(const char *from_order, const char *to_order, void *ptr, int numbytes)
+{
+    unsigned long x;
+    
+    while(numbytes>0)
+    {
+        x = byte_reorder(from_order, to_order, *(unsigned long *)ptr, numbytes);
+        *(unsigned long *)ptr = x;
+        numbytes -= sizeof(unsigned long);
+        ptr = (void *)(((unsigned char *) ptr) + sizeof(unsigned long));
+    }
 }
 

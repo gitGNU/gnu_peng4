@@ -37,4 +37,6 @@ int locrr(void *buf, unsigned sz, const unsigned long *marker, unsigned nmarker,
 
 unsigned countconsecutivezeros(void *buf0, unsigned sz);
 
-void rectify(char word2char, void *ptr, int wordsize);
+unsigned long byte_reorder(const char *from_order, const char *to_order, unsigned long from, int bytes);
+
+void rectify(const char *from_order, const char *to_order, void *ptr, int numbytes);
