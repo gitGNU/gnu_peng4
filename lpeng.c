@@ -35,11 +35,26 @@
 
 /* global */ int verbosity = 0;
 
+static int init_done = 0;
 
-const uint32_t eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };
+
+uint32_t eof_magic[] = { UINT32_C(0x1a68b01f), UINT32_C(0x4a11c153), UINT32_C(0x436621e9), UINT32_C(0xe710ffb4) };
 
 
 #define COMBINED_DIGEST_SIZE (WHIRLPOOL_DIGESTBYTES+SHA512_DIGEST_SIZE)
+
+
+void peng_unit_prep(void)
+{
+    int i;
+    
+    if(init_done)
+        return;
+    init_done=1;
+    
+    for(i=0; i<(sizeof eof_magic/sizeof eof_magic[0]); i++)
+        eof_magic[i] = byte_reorder32(SYSTEM_BYTEORDER, TARGET_BYTEORDER, eof_magic[i], 4);
+}
 
 
 /* attention ! passphrase will be erased ! */
@@ -50,6 +65,8 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, uint32_t blksize, uint32_t 
     uint8_t digest[WHIRLPOOL_DIGESTBYTES];
     uint8_t digest2[SHA512_DIGEST_SIZE];
     uint8_t combined[COMBINED_DIGEST_SIZE];
+    
+    peng_unit_prep();
     
     whirlpool_init(&wp);
     whirlpool_add(&wp, (uint8_t *) passphrase, strlen(passphrase)*8);

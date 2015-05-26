@@ -49,16 +49,16 @@
 /* Period parameters */  
 #define N MERSENNETWISTER_N
 #define M MERSENNETWISTER_M
-#define MATRIX_A 0x9908b0dfUL   /* constant vector a */
-#define UPPER_MASK 0x80000000UL /* most significant w-r bits */
-#define LOWER_MASK 0x7fffffffUL /* least significant r bits */
+#define MATRIX_A UINT32_C(0x9908b0df)   /* constant vector a */
+#define UPPER_MASK UINT32_C(0x80000000) /* most significant w-r bits */
+#define LOWER_MASK UINT32_C(0x7fffffff) /* least significant r bits */
 
 
 /* initializes mt[N] with a seed */
-void mersennetwister_init_genrand(struct mersennetwister *mt, unsigned long s)
+void mersennetwister_init_genrand(struct mersennetwister *mt, uint32_t s)
 {
     mt->mti=MERSENNETWISTER_N+1;
-    mt->mt[0]= s & 0xffffffffUL;
+    mt->mt[0]= s & UINT32_C(0xffffffff);
     for (mt->mti=1; mt->mti<N; mt->mti++) {
         mt->mt[mt->mti] = 
 	    (1812433253UL * (mt->mt[mt->mti-1] ^ (mt->mt[mt->mti-1] >> 30)) + mt->mti); 
@@ -66,7 +66,7 @@ void mersennetwister_init_genrand(struct mersennetwister *mt, unsigned long s)
         /* In the previous versions, MSBs of the seed affect   */
         /* only MSBs of the array mt[].                        */
         /* 2002/01/09 modified by Makoto Matsumoto             */
-        mt->mt[mt->mti] &= 0xffffffffUL;
+        mt->mt[mt->mti] &= UINT32_C(0xffffffff);
         /* for >32 bit machines */
     }
 }
@@ -75,7 +75,7 @@ void mersennetwister_init_genrand(struct mersennetwister *mt, unsigned long s)
 /* init_key is the array for initializing keys */
 /* key_length is its length */
 /* slight change for C++, 2004/2/26 */
-void mersennetwister_init_by_array(struct mersennetwister *mt, unsigned long init_key[], int key_length)
+void mersennetwister_init_by_array(struct mersennetwister *mt, uint32_t init_key[], int key_length)
 {
     int i, j, k;
     mersennetwister_init_genrand(mt, 19650218UL);
@@ -84,7 +84,7 @@ void mersennetwister_init_by_array(struct mersennetwister *mt, unsigned long ini
     for (; k; k--) {
         mt->mt[i] = (mt->mt[i] ^ ((mt->mt[i-1] ^ (mt->mt[i-1] >> 30)) * 1664525UL))
           + init_key[j] + j; /* non linear */
-        mt->mt[i] &= 0xffffffffUL; /* for WORDSIZE > 32 machines */
+        mt->mt[i] &= UINT32_C(0xffffffff); /* for WORDSIZE > 32 machines */
         i++; j++;
         if (i>=N) { mt->mt[0] = mt->mt[N-1]; i=1; }
         if (j>=key_length) j=0;
@@ -92,19 +92,19 @@ void mersennetwister_init_by_array(struct mersennetwister *mt, unsigned long ini
     for (k=N-1; k; k--) {
         mt->mt[i] = (mt->mt[i] ^ ((mt->mt[i-1] ^ (mt->mt[i-1] >> 30)) * 1566083941UL))
           - i; /* non linear */
-        mt->mt[i] &= 0xffffffffUL; /* for WORDSIZE > 32 machines */
+        mt->mt[i] &= UINT32_C(0xffffffff); /* for WORDSIZE > 32 machines */
         i++;
         if (i>=N) { mt->mt[0] = mt->mt[N-1]; i=1; }
     }
 
-    mt->mt[0] = 0x80000000UL; /* MSB is 1; assuring non-zero initial array */ 
+    mt->mt[0] = UINT32_C(0x80000000); /* MSB is 1; assuring non-zero initial array */ 
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
-unsigned long mersennetwister_genrand_int32(struct mersennetwister *mt)
+uint32_t mersennetwister_genrand_int32(struct mersennetwister *mt)
 {
-    unsigned long y;
-    static unsigned long mag01[2]={0x0UL, MATRIX_A};
+    uint32_t y;
+    static uint32_t mag01[2]={UINT32_C(0x0), MATRIX_A};
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
 
     if (mt->mti >= N) { /* generate N words at one time */
@@ -115,14 +115,14 @@ unsigned long mersennetwister_genrand_int32(struct mersennetwister *mt)
 
         for (kk=0;kk<N-M;kk++) {
             y = (mt->mt[kk]&UPPER_MASK)|(mt->mt[kk+1]&LOWER_MASK);
-            mt->mt[kk] = mt->mt[kk+M] ^ (y >> 1) ^ mag01[y & 0x1UL];
+            mt->mt[kk] = mt->mt[kk+M] ^ (y >> 1) ^ mag01[y & UINT32_C(0x1)];
         }
         for (;kk<N-1;kk++) {
             y = (mt->mt[kk]&UPPER_MASK)|(mt->mt[kk+1]&LOWER_MASK);
-            mt->mt[kk] = mt->mt[kk+(M-N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
+            mt->mt[kk] = mt->mt[kk+(M-N)] ^ (y >> 1) ^ mag01[y & UINT32_C(0x1)];
         }
         y = (mt->mt[N-1]&UPPER_MASK)|(mt->mt[0]&LOWER_MASK);
-        mt->mt[N-1] = mt->mt[M-1] ^ (y >> 1) ^ mag01[y & 0x1UL];
+        mt->mt[N-1] = mt->mt[M-1] ^ (y >> 1) ^ mag01[y & UINT32_C(0x1)];
 
         mt->mti = 0;
     }
@@ -131,17 +131,17 @@ unsigned long mersennetwister_genrand_int32(struct mersennetwister *mt)
 
     /* Tempering */
     y ^= (y >> 11);
-    y ^= (y << 7) & 0x9d2c5680UL;
-    y ^= (y << 15) & 0xefc60000UL;
+    y ^= (y << 7) & UINT32_C(0x9d2c5680);
+    y ^= (y << 15) & UINT32_C(0xefc60000);
     y ^= (y >> 18);
 
     return y;
 }
 
-unsigned long mersennetwister_genrand_int32_strong(struct mersennetwister *mt, unsigned long mx)
+uint32_t mersennetwister_genrand_int32_strong(struct mersennetwister *mt, uint32_t mx)
 {
-    unsigned long u;
-    unsigned long mask = 0xfffffffful;
+    uint32_t u;
+    uint32_t mask = 0xfffffffful;
     
     /* speed it up a little bit */
     if(mx<=0x1000000)
@@ -192,15 +192,15 @@ double mersennetwister_genrand_real3(struct mersennetwister *mt)
 /* generates a random number on [0,1) with 53-bit resolution*/
 double mersennetwister_genrand_res53(struct mersennetwister *mt) 
 { 
-    unsigned long a=mersennetwister_genrand_int32(mt)>>5, b=mersennetwister_genrand_int32(mt)>>6; 
+    uint32_t a=mersennetwister_genrand_int32(mt)>>5, b=mersennetwister_genrand_int32(mt)>>6; 
     return (a*67108864.0+b)*(1.0/9007199254740992.0); 
 } 
 /* These real versions are due to Isaku Wada, 2002/01/09 added */
 
 
-unsigned long long mersennetwister_genrand_int64(struct mersennetwister *mt)
+uint64_t mersennetwister_genrand_int64(struct mersennetwister *mt)
 {
-    unsigned long long res = mersennetwister_genrand_int32(mt);
+    uint64_t res = mersennetwister_genrand_int32(mt);
     
     res<<=32;
     res|=mersennetwister_genrand_int32(mt);

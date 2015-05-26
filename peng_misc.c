@@ -63,8 +63,7 @@ int kjw_memcmp(const void *abuf0, const void *bbuf0, uint32_t sz0)
 }
 
 
-/* TODO: this is POSIX only */
-/* TODO: byte order */
+/* TODO: this is POSIX (Linux) only */
 uint32_t do_padding(void *buf0, uint32_t sz0, const uint32_t *marker, uint32_t nmarker, uint32_t marker_byteoffset)
 {
     FILE *f;
@@ -106,7 +105,6 @@ uint32_t do_padding(void *buf0, uint32_t sz0, const uint32_t *marker, uint32_t n
 }
 
 
-/* TODO: byte order */
 int locrr(void *buf, uint32_t sz, const uint32_t *marker, uint32_t nmarker, int minmatch)
 {
     int pos = (int)sz-minmatch, n;
@@ -230,7 +228,7 @@ static uint32_t doshift(uint32_t v, int n)
 }
 
 
-#define REORDER(f,t,i,j) j |= doshift(i&amask32(f), ashift(f)-ashift(t));
+#define REORDER32(f,t,i,j) j |= doshift(i&amask32(f), ashift(f)-ashift(t));
 
 
 uint32_t byte_reorder32(const char *from_order, const char *to_order, uint32_t from, int bytes)
@@ -240,14 +238,16 @@ uint32_t byte_reorder32(const char *from_order, const char *to_order, uint32_t f
     if(!strcmp(from_order,to_order))
         return from;
     
-    if(bytes>0) REORDER(from_order[0], to_order[0], from, res)
-    if(bytes>1)  REORDER(from_order[1], to_order[1], from, res)
-    if(bytes>2)  REORDER(from_order[2], to_order[2], from, res)
-    if(bytes>3)  REORDER(from_order[3], to_order[3], from, res)
+    if(bytes>0) REORDER32(from_order[0], to_order[0], from, res)
+    if(bytes>1)  REORDER32(from_order[1], to_order[1], from, res)
+    if(bytes>2)  REORDER32(from_order[2], to_order[2], from, res)
+    if(bytes>3)  REORDER32(from_order[3], to_order[3], from, res)
 
     return res;
 }
 
+
+#define REORDER64(f,t,i,j) j |= doshift(i&amask64(f), ashift(f)-ashift(t));
 
 
 uint64_t byte_reorder64(const char *from_order, const char *to_order, uint64_t from, int bytes)
@@ -257,14 +257,14 @@ uint64_t byte_reorder64(const char *from_order, const char *to_order, uint64_t f
     if(!strcmp(from_order,to_order))
         return from;
     
-    if(bytes>0) REORDER(from_order[0], to_order[0], from, res)
-    if(bytes>1)  REORDER(from_order[1], to_order[1], from, res)
-    if(bytes>2)  REORDER(from_order[2], to_order[2], from, res)
-    if(bytes>3)  REORDER(from_order[3], to_order[3], from, res)
-    if(bytes>3)  REORDER(from_order[4], to_order[4], from, res)
-    if(bytes>4)  REORDER(from_order[5], to_order[5], from, res)
-    if(bytes>5)  REORDER(from_order[6], to_order[6], from, res)
-    if(bytes>6)  REORDER(from_order[7], to_order[7], from, res)
+    if(bytes>0) REORDER64(from_order[0], to_order[0], from, res)
+    if(bytes>1)  REORDER64(from_order[1], to_order[1], from, res)
+    if(bytes>2)  REORDER64(from_order[2], to_order[2], from, res)
+    if(bytes>3)  REORDER64(from_order[3], to_order[3], from, res)
+    if(bytes>3)  REORDER64(from_order[4], to_order[4], from, res)
+    if(bytes>4)  REORDER64(from_order[5], to_order[5], from, res)
+    if(bytes>5)  REORDER64(from_order[6], to_order[6], from, res)
+    if(bytes>6)  REORDER64(from_order[7], to_order[7], from, res)
 
     return res;
 }

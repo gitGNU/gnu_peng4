@@ -23,9 +23,9 @@
 #include "sysparm.h"
 
 
-uint32_t bytebits(int c)
+int bytebits(int c)
 {
-    register uint32_t n=0;
+    register int n=0;
     
     if(c&1) n++;
     if(c&2) n++;
@@ -41,7 +41,7 @@ uint32_t bytebits(int c)
 
 int main(int argc, const char *argv[])
 {
-    uint64_t num;
+    long num;
     int i, c;
     FILE *f;
 
@@ -62,7 +62,7 @@ int main(int argc, const char *argv[])
             num += bytebits(c);
         }
         fclose(f);
-        printf("%s: %llu\n", argv[i], num);
+        printf("%s: %lu\n", argv[i], num);
     }
     return 0;
 }

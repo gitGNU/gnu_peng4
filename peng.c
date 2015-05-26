@@ -41,7 +41,7 @@
 #define LICENSE "This program comes with ABSOLUTELY NO WARRANTY.\nLicensed under the GNU Public License version 3 or later.\n"
 
 
-const char *peng_version = "4.01.0068"; /* CHANGEME */
+const char *peng_version = "4.01.0069"; /* CHANGEME */
 
 
 #define MAXFNLEN              1024
@@ -206,7 +206,7 @@ int main(int argc, char **argv)
     {
         printf("ID = ");
         for(i=0; i<10; i++)
-            printf("%08lx ", mersennetwister_genrand_int32(&mypce.mt));
+            printf("%08" PRIx32 " ", mersennetwister_genrand_int32(&mypce.mt));
         puts(""); fflush(stdout);
     }
     
