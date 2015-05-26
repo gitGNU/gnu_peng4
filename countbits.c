@@ -20,10 +20,12 @@
 
 #include <stdio.h>
 
+#include "sysparm.h"
 
-unsigned bytebits(int c)
+
+uint32_t bytebits(int c)
 {
-    register unsigned n=0;
+    register uint32_t n=0;
     
     if(c&1) n++;
     if(c&2) n++;
@@ -39,7 +41,7 @@ unsigned bytebits(int c)
 
 int main(int argc, const char *argv[])
 {
-    unsigned long long num;
+    uint64_t num;
     int i, c;
     FILE *f;
 

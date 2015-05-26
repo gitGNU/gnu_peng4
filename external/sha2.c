@@ -36,6 +36,7 @@
 #endif
 
 #include <string.h>
+#include "sysparm.h"
 
 #include "sha2.h"
 

@@ -42,6 +42,7 @@
 */
 
 #include <stdio.h>
+#include "sysparm.h"
 
 #include "mt19937ar.h"
 

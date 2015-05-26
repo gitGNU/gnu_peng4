@@ -20,33 +20,33 @@
 
 struct pengset
 {
-    unsigned            blksize;
-    unsigned short     *perm1;
-    unsigned short     *perm2;
-    unsigned char      *mask1;
+    uint32_t            blksize;
+    uint16_t     *perm1;
+    uint16_t     *perm2;
+    uint8_t      *mask1;
 #if USE_MODE_XPX
-    unsigned char      *mask2;
+    uint8_t      *mask2;
 #endif
 };
 
 
 struct pengpipe
 {
-    unsigned            blksize;
-    unsigned            rounds;       /* y dimension */
-    unsigned            variations;   /* x dimension */
+    uint32_t            blksize;
+    uint32_t            rounds;       /* y dimension */
+    uint32_t            variations;   /* x dimension */
     struct pengset   ***mtx;          /* 2d matrix */
 #if USE_MODE_CBC
-    unsigned char      *iv;
+    uint8_t      *iv;
 #endif
 };
 
 
 
-struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt);
-struct pengpipe *genpengpipe(unsigned blksize, unsigned rounds, unsigned variations, struct mersennetwister *mt);
+struct pengset *genpengset(uint32_t blksize, struct mersennetwister *mt);
+struct pengpipe *genpengpipe(uint32_t blksize, uint32_t rounds, uint32_t variations, struct mersennetwister *mt);
 void destroypengset(struct pengset *p);
 void destroypengpipe(struct pengpipe *p);
-void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt);
-void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt, char threads_flag);
-unsigned long getbufsize(struct pengpipe *p);
+void execpengset(struct pengset *p, const uint8_t *buf1, uint8_t *tmpbuf, uint8_t *buf2, char encrypt);
+void execpengpipe(struct pengpipe *p, uint8_t *buf1, uint8_t *tmpbuf, uint8_t *buf2, char encrypt, char threads_flag);
+uint32_t getbufsize(struct pengpipe *p);

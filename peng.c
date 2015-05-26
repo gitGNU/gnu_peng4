@@ -30,6 +30,7 @@
 #endif
 #include <string.h>
 
+#include "sysparm.h"
 #include "peng_misc.h"
 #include "whirlpool.h"
 #include "mt19937ar.h"
@@ -40,7 +41,7 @@
 #define LICENSE "This program comes with ABSOLUTELY NO WARRANTY.\nLicensed under the GNU Public License version 3 or later.\n"
 
 
-const char *peng_version = "4.01.0067"; /* CHANGEME */
+const char *peng_version = "4.01.0068"; /* CHANGEME */
 
 
 #define MAXFNLEN              1024
@@ -74,15 +75,15 @@ void printversion(void)
 
 
 /* returns array of numbers, first being the count */
-unsigned *parseints(char *s)
+uint32_t *parseints(char *s)
 {
     int i0=0,i,j=1,n=1;
-    unsigned *res;
+    uint32_t *res;
     
     for(i=0; s[i]; i++)
         if(s[i]==',')
             n++;
-    res = MALLOC(sizeof(unsigned)*(n+1));
+    res = MALLOC(sizeof(uint32_t)*(n+1));
     res[0] = n;
     for(i=0; s[i]; i++)
     {
@@ -108,11 +109,11 @@ int main(int argc, char **argv)
     int multithreading = 0;
     int delflag;
     char fnmode = 'n';
-    unsigned *binparm;
-    unsigned blksize, rounds, variations;
+    uint32_t *binparm;
+    uint32_t blksize, rounds, variations;
     struct peng_cmd_environment mypce;
     char *origfn, infn[MAXFNLEN], outfn[MAXFNLEN], *passphrase=NULL;
-    unsigned long long total;
+    uint64_t total;
 
     if(argc<=1)
     {

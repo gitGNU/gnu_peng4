@@ -4,11 +4,7 @@
 */
 
 
-#define TARGET_BYTEORDER "3210"
-#define SYSTEM_BYTEORDER "0123"
+#define TARGET_BYTEORDER "32107654"
+#define SYSTEM_BYTEORDER "01234567"
 
-
-typedef unsigned char             kjw_uint8;
-typedef unsigned short            kjw_uint16;
-typedef unsigned int              kjw_uint32;
-typedef unsigned long             kjw_uint64;
+#include <inttypes.h>

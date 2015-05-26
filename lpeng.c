@@ -24,6 +24,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "sysparm.h"
 #include "whirlpool.h"
 #include "mt19937ar.h"
 #include "peng_misc.h"
@@ -35,27 +36,27 @@
 /* global */ int verbosity = 0;
 
 
-const unsigned long eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };
+const uint32_t eof_magic[] = { 0x1a68b01ful, 0x4a11c153ul, 0x436621e9ul, 0xe710ffb4ul };
 
 
 #define COMBINED_DIGEST_SIZE (WHIRLPOOL_DIGESTBYTES+SHA512_DIGEST_SIZE)
 
 
 /* attention ! passphrase will be erased ! */
-void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned rounds, unsigned variations, char *passphrase, int eflag)
+void peng_cmd_prep(struct peng_cmd_environment *pce, uint32_t blksize, uint32_t rounds, uint32_t variations, char *passphrase, int eflag)
 {
     struct whirlpool wp;
     sha512_ctx sha512;
-    unsigned char digest[WHIRLPOOL_DIGESTBYTES];
-    unsigned char digest2[SHA512_DIGEST_SIZE];
-    unsigned char combined[COMBINED_DIGEST_SIZE];
+    uint8_t digest[WHIRLPOOL_DIGESTBYTES];
+    uint8_t digest2[SHA512_DIGEST_SIZE];
+    uint8_t combined[COMBINED_DIGEST_SIZE];
     
     whirlpool_init(&wp);
-    whirlpool_add(&wp, (unsigned char *) passphrase, strlen(passphrase)*8);
+    whirlpool_add(&wp, (uint8_t *) passphrase, strlen(passphrase)*8);
     whirlpool_finalize(&wp, digest);
     
     sha512_init(&sha512);
-    sha512_update(&sha512, (unsigned char *) passphrase, strlen(passphrase));
+    sha512_update(&sha512, (uint8_t *) passphrase, strlen(passphrase));
     sha512_final(&sha512, digest2);
     
     memcpy(combined, digest, WHIRLPOOL_DIGESTBYTES);
@@ -63,7 +64,7 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned 
     
     rectify(SYSTEM_BYTEORDER, TARGET_BYTEORDER, combined, COMBINED_DIGEST_SIZE);
     
-    mersennetwister_init_by_array(&pce->mt, (unsigned long *)combined, COMBINED_DIGEST_SIZE/sizeof(unsigned long));  /* TODO byte order, packing */
+    mersennetwister_init_by_array(&pce->mt, (uint32_t *)combined, COMBINED_DIGEST_SIZE/sizeof(uint32_t));  /* TODO byte order, packing */
     
     pce->pp = genpengpipe(blksize, rounds, variations, &pce->mt);
     pce->blksize = blksize;
@@ -80,12 +81,12 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned 
 }
 
 
-int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, unsigned long long total, const char *outfn, int outh, char multithreading, char min_locrr_seq_len)
+int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, uint64_t total, const char *outfn, int outh, char multithreading, char min_locrr_seq_len)
 {
     int i,j,k,r,z;
     int guess_eof = 0, truncate_at = 0;
-    unsigned num=0, padding_remaining=0;
-    unsigned long long pos=0;
+    uint32_t num=0, padding_remaining=0;
+    uint64_t pos=0;
     
     for(;;)
     {

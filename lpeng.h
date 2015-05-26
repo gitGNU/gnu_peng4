@@ -25,12 +25,12 @@ struct peng_cmd_environment
 {
     struct pengpipe *pp;
     struct mersennetwister mt;
-    unsigned char *buf1, *buf2, *buf3;
-    unsigned blksize, bufsize;
+    uint8_t *buf1, *buf2, *buf3;
+    uint32_t blksize, bufsize;
     int eflag;
 };
 
 
-void peng_cmd_prep(struct peng_cmd_environment *pce, unsigned blksize, unsigned rounds, unsigned variations, char *passphrase, int eflag);
-int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, unsigned long long total, const char *outfn, int outh, char multithreading, char min_locrr_seq_len);
+void peng_cmd_prep(struct peng_cmd_environment *pce, uint32_t blksize, uint32_t rounds, uint32_t variations, char *passphrase, int eflag);
+int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, uint64_t total, const char *outfn, int outh, char multithreading, char min_locrr_seq_len);
 void peng_cmd_unprep(struct peng_cmd_environment *pce);

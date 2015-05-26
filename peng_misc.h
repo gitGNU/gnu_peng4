@@ -25,18 +25,24 @@
 
 
 
-void *chkmalloc(unsigned x);
+void *chkmalloc(uint32_t x);
 
-int mymemcmp(const void *abuf0, const void *bbuf0, unsigned sz0);
+int mymemcmp(const void *abuf0, const void *bbuf0, uint32_t sz0);
 
-void memxor(void *dst0, const void *src0, unsigned sz0);
+void memxor(void *dst0, const void *src0, uint32_t sz0);
 
-unsigned do_padding(void *buf0, unsigned sz0, const unsigned long *marker, unsigned nmarker, unsigned marker_byteoffset);
+uint32_t do_padding(void *buf0, uint32_t sz0, const uint32_t *marker, uint32_t nmarker, uint32_t marker_byteoffset);
 
-int locrr(void *buf, unsigned sz, const unsigned long *marker, unsigned nmarker, int minmatch);
+int locrr(void *buf, uint32_t sz, const uint32_t *marker, uint32_t nmarker, int minmatch);
 
-unsigned countconsecutivezeros(void *buf0, unsigned sz);
+uint32_t countconsecutivezeros(void *buf0, uint32_t sz);
 
-unsigned long byte_reorder(const char *from_order, const char *to_order, unsigned long from, int bytes);
+uint32_t byte_reorder32(const char *from_order, const char *to_order, uint32_t from, int bytes);
+
+uint64_t byte_reorder64(const char *from_order, const char *to_order, uint64_t from, int bytes);
 
 void rectify(const char *from_order, const char *to_order, void *ptr, int numbytes);
+
+void quickrepl(char *buf, const char *orig, const char *dest);
+
+const char *quickrepl_dyn(const char *fmt, const char *orig, const char *dest);

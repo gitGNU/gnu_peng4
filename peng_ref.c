@@ -30,6 +30,7 @@
 #include <string.h>
 #include <pthread.h>
 
+#include "sysparm.h"
 #include "mt19937ar.h"
 #include "peng_ref.h"
 #include "peng_misc.h"
@@ -49,19 +50,19 @@
 #if DEBUG
 #define QBITCOPY(b1,o1,m1,b2,o2,m2) qbitcopy(b1,o1,m1,b2,o2,m2)
 #else
-#define QBITCOPY(b1,o1,m1,b2,o2,m2) { if(b1[o1/8] & (1U<<(o1&7)))     b2[o2/8] |= (unsigned char)(1U<<(o2&7)); }
+#define QBITCOPY(b1,o1,m1,b2,o2,m2) { if(b1[o1/8] & (1U<<(o1&7)))     b2[o2/8] |= (uint8_t)(1U<<(o2&7)); }
 #endif
 
 
-static unsigned char q2c(unsigned long long x)
+static uint8_t q2c(uint64_t x)
 {
-    /* return (unsigned char)((x ^ (x>>8) ^ (x>>16) ^ (x>>24) ^ (x>>32) ^ (x>>40) ^ (x>>48) ^ (x>>56)) & 0xff); */
-    return (unsigned char)((x ^ (x>>8) ^ (x>>15) ^ (x>>24) ^ (x>>33) ^ (x>>40) ^ (x>>48) ^ ((x>>56)+1)) & 0xff);
+    /* return (uint8_t)((x ^ (x>>8) ^ (x>>16) ^ (x>>24) ^ (x>>32) ^ (x>>40) ^ (x>>48) ^ (x>>56)) & 0xff); */
+    return (uint8_t)((x ^ (x>>8) ^ (x>>15) ^ (x>>24) ^ (x>>33) ^ (x>>40) ^ (x>>48) ^ ((x>>56)+1)) & 0xff);
 }
 
 
 #if DEBUG
-static void qbitcopy(const unsigned char *buf1, unsigned off1, unsigned max1, unsigned char *buf2, unsigned off2, unsigned max2)
+static void qbitcopy(const uint8_t *buf1, uint32_t off1, uint32_t max1, uint8_t *buf2, uint32_t off2, uint32_t max2)
 {
     if(off1/8>=max1 || off2/8>=max2)
     {
@@ -70,18 +71,18 @@ static void qbitcopy(const unsigned char *buf1, unsigned off1, unsigned max1, un
     }
     
     if(buf1[off1/8] & (1U<<(off1&7)))
-        buf2[off2/8] |= (unsigned char)(1U<<(off2&7));
+        buf2[off2/8] |= (uint8_t)(1U<<(off2&7));
     /*
     else
-        buf2[off2/8] &= ~(unsigned char)(1U<<(off2&7));
+        buf2[off2/8] &= ~(uint8_t)(1U<<(off2&7));
     */
 }
 #endif
 
 
-struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt)
+struct pengset *genpengset(uint32_t blksize, struct mersennetwister *mt)
 {
-    unsigned blksize8 = blksize*8;
+    uint32_t blksize8 = blksize*8;
     struct pengset *res = MALLOC(sizeof(struct pengset));
     char *tempflg1 = MALLOCA(blksize8*sizeof(char));
     char *tempflg2 = MALLOCA(blksize8*sizeof(char));
@@ -90,11 +91,11 @@ struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt)
     memset(tempflg1, 0, blksize8);
     memset(tempflg2, 0, blksize8);
     res->blksize = blksize;
-    res->perm1 = MALLOC(blksize8*sizeof(unsigned short));
-    res->perm2 = MALLOC(blksize8*sizeof(unsigned short));
-    res->mask1  = MALLOC(blksize*sizeof(unsigned char));
+    res->perm1 = MALLOC(blksize8*sizeof(uint16_t));
+    res->perm2 = MALLOC(blksize8*sizeof(uint16_t));
+    res->mask1  = MALLOC(blksize*sizeof(uint8_t));
 #if USE_MODE_XPX
-    res->mask2  = MALLOC(blksize*sizeof(unsigned char));
+    res->mask2  = MALLOC(blksize*sizeof(uint8_t));
 #endif
     memset(res->perm1, 0, blksize8);
     memset(res->perm2, 0, blksize8);
@@ -147,7 +148,7 @@ struct pengset *genpengset(unsigned blksize, struct mersennetwister *mt)
 }
 
 
-struct pengpipe *genpengpipe(unsigned blksize, unsigned rounds, unsigned variations, struct mersennetwister *mt)
+struct pengpipe *genpengpipe(uint32_t blksize, uint32_t rounds, uint32_t variations, struct mersennetwister *mt)
 {
     int i,j;
     struct pengpipe *res = MALLOC(sizeof(struct pengpipe));
@@ -219,10 +220,10 @@ void destroypengpipe(struct pengpipe *p)
 }
 
 
-void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt)
+void execpengset(struct pengset *p, const uint8_t *buf1, uint8_t *tmpbuf, uint8_t *buf2, char encrypt)
 {
-    unsigned blksize = p->blksize;
-    unsigned blksize8 = blksize*8;
+    uint32_t blksize = p->blksize;
+    uint32_t blksize8 = blksize*8;
     int i;
     
     if(encrypt)
@@ -269,14 +270,14 @@ void execpengset(struct pengset *p, const unsigned char *buf1, unsigned char *tm
 struct epp_thr_context
 {
     struct pengset    **mtx;
-    unsigned            rounds;
-    unsigned            blksize;
-    unsigned char      *buf1;
-    unsigned char      *tmpbuf;
-    unsigned char      *buf2;
+    uint32_t            rounds;
+    uint32_t            blksize;
+    uint8_t      *buf1;
+    uint8_t      *tmpbuf;
+    uint8_t      *buf2;
     char encrypt;
 #if USE_MODE_CBC
-    unsigned char      *iv;
+    uint8_t      *iv;
 #endif
 };
 
@@ -287,8 +288,8 @@ static void *epp_thr(void *param)
     struct epp_thr_context *c = (struct epp_thr_context *) param;
     
 #if USE_MODE_CBC
-    unsigned char *lastbuf = MALLOCA(c->blksize);
-    unsigned char *lastbuftmp = MALLOCA(c->blksize);
+    uint8_t *lastbuf = MALLOCA(c->blksize);
+    uint8_t *lastbuftmp = MALLOCA(c->blksize);
     
     memcpy(lastbuf, c->iv, c->blksize);
 #endif
@@ -340,10 +341,10 @@ static void *epp_thr(void *param)
 }
 
 
-void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf, unsigned char *buf2, char encrypt, char threads_flag)
+void execpengpipe(struct pengpipe *p, uint8_t *buf1, uint8_t *tmpbuf, uint8_t *buf2, char encrypt, char threads_flag)
 {
     int i,r;
-    unsigned off;
+    uint32_t off;
     struct epp_thr_context *ctx;
     pthread_t *pthr = MALLOCA(p->variations*sizeof(pthread_t));
     
@@ -395,7 +396,7 @@ void execpengpipe(struct pengpipe *p, unsigned char *buf1, unsigned char *tmpbuf
 }
 
 
-unsigned long getbufsize(struct pengpipe *p)
+uint32_t getbufsize(struct pengpipe *p)
 {
-    return (unsigned long)p->blksize * p->variations;
+    return (uint32_t)p->blksize * p->variations;
 }

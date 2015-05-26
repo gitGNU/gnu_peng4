@@ -2,7 +2,7 @@ DEFS = -DDORKINESS=0 -DSKIP_XOR=0 -DSKIP_PERMUT=0 -DDEBUG=0 -DBETA=1 -DALPHA=0 \
  -DUSE_MODE_XPX=1 -DUSE_MODE_CBC=1 -DLINUX=1 -DBYTEORDER=12345678
 
 CFLAGS = -O3 -Wall -Wno-pointer-sign -std=c90 -D_GNU_SOURCE \
- -Iexternal/ -Lexternal/
+ -I. -Iexternal/ -Lexternal/
 #CFLAGS = -ggdb -Wall -Wno-pointer-sign -std=c90 -ggdb -D_GNU_SOURCE \
 # -Iexternal/ -Lexternal/
 
