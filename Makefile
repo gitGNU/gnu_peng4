@@ -13,7 +13,7 @@ SOURCES= external/whirlpool.c external/mt19937ar.c external/sha2.c \
 
 TARGETS= $(addsuffix .o, $(basename $(SOURCES)))
 
-EXTRA= TODO README LICENSE CHANGELOG Makefile
+EXTRA= TODO README LICENSE CHANGELOG
 
 ##############################################################################
 
@@ -40,11 +40,11 @@ test:
 
 ci: clean
 	./scripts/updver.py
-	git add *.c *.h Makefile $(EXTRA) scripts/*.?? external/*
+	git add *.c *.h Makefile* $(EXTRA) scripts/*.?? external/*
 	git ci
 
 keywords:
-	git-keyw-filter *.cc *.hh Makefile
+	git-keyw-filter *.cc *.hh Makefile*
 
 push: ci
 	git push savannah
@@ -53,5 +53,5 @@ push: ci
 
 tarball: $(SOURCES)
 	./scripts/000_genbsd_shebang.sh
-	./scripts/mktarball.sh peng4-$(shell ./scripts/getver.sh).tar.bz2 $(EXTRA) *.c *.h scripts/* external/* docs/*
+	./scripts/mktarball.sh peng4-$(shell ./scripts/getver.sh).tar.bz2 Makefile* $(EXTRA) *.c *.h scripts/* external/* docs/*
 

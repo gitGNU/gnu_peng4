@@ -5,7 +5,7 @@ COMPATIBILITY
  * byte order (alignment?) - implement rectify()
  * block encryption API (for things like TrueCrypt or dm-crypt)
  * l(ib)peng: no output to stderr
- * BSD compatibility
+ * maintain BSD compatibility
 
 OPTIMIZATION
  * offset initialization for thread's Mersenne Twister (when generating mtx)
@@ -14,7 +14,9 @@ OPTIMIZATION
 LUXURY
  * store parameters with enc file
  * integrity checks
- * binary tarball
+ * binary tarball / rpm / deb
+ * src subdir and more advanced fs hierarchy
+ * automated testing environment (f4ck-u)
 
 DOCUMENTATION
  * doxygen

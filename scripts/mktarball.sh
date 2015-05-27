@@ -18,8 +18,8 @@ then
         scp $ARC* yanestra@dl.sv.gnu.org:/releases/peng4/
     else
         echo '*****' $ARC is prepared
+        exit 0
     fi
-    exit 0
 fi
 
 mv $ARC* tarball
