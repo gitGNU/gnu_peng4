@@ -1,0 +1,37 @@
+DEFS = -DDORKINESS=0 -DSKIP_XOR=0 -DSKIP_PERMUT=0 -DDEBUG=0 -DBETA=1 -DALPHA=0 \
+ -DUSE_MODE_XPX=1 -DUSE_MODE_CBC=1 -DLINUX=1 -DTESTARCH=1
+
+CC = armeb-unknown-linux-gnueabi-gcc
+
+CFLAGS = -O3 -Wall -Wno-pointer-sign -std=c90 -D_GNU_SOURCE \
+ -I/usr/include -I. -Iexternal/ -Lexternal/ -static
+#CFLAGS = -ggdb -Wall -Wno-pointer-sign -std=c90 -ggdb -D_GNU_SOURCE \
+# -Iexternal/ -Lexternal/
+
+LIBS = -pthread
+
+SOURCES= external/whirlpool.c external/mt19937ar.c external/sha2.c \
+ peng_ref.c peng.c peng_misc.c lpeng.c
+
+TARGETS= $(addsuffix .o, $(basename $(SOURCES)))
+
+EXTRA= TODO README LICENSE CHANGELOG Makefile
+
+##############################################################################
+
+all: peng_armeb countbits
+
+%.o: %.c
+	$(CC) -c $(CFLAGS) $(DEFS) $< -o $@ $(LIBS)
+
+peng_armeb: $(TARGETS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(DEFS) -o peng_armeb $(TARGETS) $(LIBS)
+
+countbits: countbits.c
+	$(CC) $(CFLAGS) -o countbits countbits.c
+
+clean:
+	rm -f peng_armeb peng_ref *.o core countbits
+	rm -f testfile* *~
+	rm -f external/*.o
+

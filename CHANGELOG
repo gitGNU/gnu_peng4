@@ -1,14 +1,25 @@
+**********************
 DATE         VERSION
 2015-05-13   4.01.00.0047
 
 first release (preview to Savannah admin)
 
+**********************
 DATE         VERSION
 2015-05-19   4.01.00.0050
 
 fixes - release
 
+**********************
 DATE         VERSION
 2015-05-20   4.01.0064
 
 BSD compiles ok
+
+**********************
+DATE         VERSION
+2015-05-20   4.01.0070
+
+armeb architecture test with arbitrary target order settings:
+PASSED :-)
+

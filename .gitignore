@@ -2,3 +2,4 @@
 testdata
 peng*.tar.bz2
 tarball
+*.o
