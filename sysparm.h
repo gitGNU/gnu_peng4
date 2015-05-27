@@ -11,16 +11,5 @@
     **TESTING**
 */
 
-#if !TESTARCH
-
 #define SYSTEM_BYTEORDER "01234567"
-
-#else
-
-#define SYSTEM_BYTEORDER "32107654"
-
-#endif
-
-#define TARGET_BYTEORDER "23016745"
-
-#include <inttypes.h>
+#define TARGET_BYTEORDER "01234567"
