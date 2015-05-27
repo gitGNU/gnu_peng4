@@ -11,5 +11,7 @@
     **TESTING**
 */
 
+#include <inttypes.h>
+
 #define SYSTEM_BYTEORDER "01234567"
 #define TARGET_BYTEORDER "01234567"

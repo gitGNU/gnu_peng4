@@ -5,7 +5,7 @@ COMPATIBILITY
  * byte order (alignment?) - implement rectify()
  * block encryption API (for things like TrueCrypt or dm-crypt)
  * l(ib)peng: no output to stderr
- * maintain BSD compatibility
+ * maintain BSD compatibility; verify stdint.h (inttypes.h)
 
 OPTIMIZATION
  * offset initialization for thread's Mersenne Twister (when generating mtx)
@@ -16,13 +16,10 @@ LUXURY
  * integrity checks
  * binary tarball / rpm / deb
  * src subdir and more advanced fs hierarchy
- * automated testing environment (f4ck-u)
 
 DOCUMENTATION
  * doxygen
  * EOF marker warning
- * unsigned long long etc. -> int(xx)_t or alike (stdint.h seems not be the
-   solution)
 
 DEBUG
  * debug system (flags)
