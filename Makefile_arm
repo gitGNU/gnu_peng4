@@ -31,7 +31,7 @@ countbits: countbits.c
 	$(CC) $(CFLAGS) -o countbits countbits.c
 
 clean:
-	rm -f peng_armeb peng_ref *.o core countbits
+	rm -f peng_armeb *.o core countbits
 	rm -f testfile* *~
 	rm -f external/*.o
 

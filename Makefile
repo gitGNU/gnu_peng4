@@ -29,7 +29,7 @@ countbits: countbits.c
 	$(CC) $(CFLAGS) -o countbits countbits.c
 
 clean:
-	rm -f peng peng_ref *.o core countbits
+	rm -f peng *.o core countbits
 	rm -f testfile* *~
 	rm -f external/*.o
 
@@ -39,15 +39,19 @@ test:
 ##############################################################################
 
 ci: clean
+	git add *.c *.h Makefile* $(EXTRA) scripts/*.?? external/*
+	git ci
+
+bump: clean
 	./scripts/updver.py
 	git add *.c *.h Makefile* $(EXTRA) scripts/*.?? external/*
 	git ci
 
+push: bump
+	git push savannah
+
 keywords:
 	git-keyw-filter *.cc *.hh Makefile*
-
-push: ci
-	git push savannah
 
 ##############################################################################
 
