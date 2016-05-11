@@ -88,8 +88,8 @@ struct pengset *genpengset(uint32_t blksize, struct mersennetwister *mt)
     char *tempflg2 = MALLOCA(blksize8*sizeof(char));
     int i,j,k;
     
-    memset(tempflg1, 0, blksize8);
-    memset(tempflg2, 0, blksize8);
+    memset(tempflg1, 0, blksize8*sizeof(char));
+    memset(tempflg2, 0, blksize8*sizeof(char));
     res->blksize = blksize;
     res->perm1 = MALLOC(blksize8*sizeof(uint16_t));
     res->perm2 = MALLOC(blksize8*sizeof(uint16_t));
@@ -97,18 +97,20 @@ struct pengset *genpengset(uint32_t blksize, struct mersennetwister *mt)
 #if USE_MODE_XPX
     res->mask2  = MALLOC(blksize*sizeof(uint8_t));
 #endif
-    memset(res->perm1, 0, blksize8);
-    memset(res->perm2, 0, blksize8);
+    memset(res->perm1, 0, blksize8*sizeof(uint16_t));
+    memset(res->perm2, 0, blksize8*sizeof(uint16_t));
+    
+    /* DEBUG_TIMING(1, "genpengset_0") */
     
     for(i=0; i<blksize8; i++)
     {
 #if DORKINESS>1
         j = mersennetwister_genrand_int32(mt) % blksize8;
-        /* this is dorky, but it speeds things up a lot */
+        /* this is dorky, but it speeds things up a lot (?) */
         while(tempflg1[j])
             j = (j+1)%blksize8;
         k = mersennetwister_genrand_int32(mt) % blksize8;
-        /* this is dorky, but it speeds things up a lot */
+        /* this is dorky, but it speeds things up a lot (?) */
         while(tempflg2[k])
             k = (k+1)%blksize8;
 #elif DORKINESS==1
@@ -143,6 +145,8 @@ struct pengset *genpengset(uint32_t blksize, struct mersennetwister *mt)
         res->mask2[i] = q2c(mersennetwister_genrand_int32(mt));
 #endif
     }
+    
+    /* DEBUG_TIMING(1, "genpengset_1") */
     
     return res;
 }

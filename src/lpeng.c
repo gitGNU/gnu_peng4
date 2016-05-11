@@ -34,6 +34,7 @@
 
 
 /* global */ int verbosity = 0;
+/* global */ int debugmask = 0;
 
 static int init_done = 0;
 
@@ -105,6 +106,8 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
     uint32_t num=0, padding_remaining=0;
     uint64_t pos=0;
     
+    /* DEBUG_TIMING(1, "peng_cmd_process_0") */
+
     for(;;)
     {
         if(verbosity>1)
@@ -212,6 +215,8 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
             fprintf(stderr, "warning: %s: bytes buffered not equal bytes written (fin)\n", outfn);
         }
     }
+    
+    /* DEBUG_TIMING(1, "peng_cmd_process_1") */
     
     return 0;
 }

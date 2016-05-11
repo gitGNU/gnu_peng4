@@ -48,6 +48,21 @@ const char *peng_version = "4.01.0070"; /* CHANGEME */
 #define MIN_LOCRR_SEQ_LEN        8
 
 
+struct easyset
+{
+    int  cat;
+    char c;
+    int  v;
+} easysets[] =
+{
+    {0,'L',0x100}, {0,'M',0x1000}, {0,'H',0x10000}, {0,'X',0x100000}, 
+    {1,'L',5}, {1,'M',10}, {1,'H',20}, {1,'X',49}, 
+    {2,'L',1}, {2,'M',5}, {2,'H',11}, {2,'X',17},
+    
+    {-1,0,0}
+};
+
+
 void printversion(void)
 {
 #if ALPHA || BETA || DEBUG
@@ -74,7 +89,7 @@ void printversion(void)
 }
 
 
-/* returns array of numbers, first being the count */
+/* returns array of numbers, first item being the count */
 uint32_t *parseints(char *s)
 {
     int i0=0,i,j=1,n=1;
@@ -97,6 +112,29 @@ uint32_t *parseints(char *s)
     }
     res[j]=atoi(s+i0);
     return res;
+}
+
+
+/* returns array of numbers, first item being the count */
+uint32_t *parseeasy(char *s, struct easyset es[])
+{
+    int n=strlen(s), i;
+    int cat;
+    uint32_t *binparm = malloc((n+1)*sizeof(uint32_t));
+    
+    binparm[0]=n;
+    
+    for(cat=0; s[cat]; cat++)
+    {
+        binparm[cat+1]=0;
+        for(i=0; es[i].c; i++)
+            if(es[i].cat==cat && es[i].c==s[cat])
+            {
+                binparm[cat+1]=es[i].v;
+                break;
+            }
+    }
+    return binparm;
 }
 
 
@@ -123,17 +161,20 @@ int main(int argc, char **argv)
     /* GNU: */
     /* + means: parse POSIXLY_CORRECT, stopping with the first non-option */
     /* - means: give opt==1 for any non-option parameter */
-    while((opt = getopt(argc, argv, "+hVO:drRnvP:m")) != -1)
+    while((opt = getopt(argc, argv, "+hVO:drRnvP:mD:")) != -1)
     {
         switch(opt) 
         {
             case 'O':
-                parm = strdup(optarg);  /* TODO leak */
+                parm = strdup(optarg);  /* TODO: leak */
                 if(!parm)
                 {
                     fputs("out of memory\n", stderr);
                     abort();
                 }
+                break;
+            case 'D':
+                debugmask = atoi(optarg);   /* you know what you are doing - ignore errors */
                 break;
             case 'r':
             case 'R':
@@ -169,13 +210,15 @@ int main(int argc, char **argv)
                 fputs("options:\t-h\t\tthis help\n"
                       "\t\t-V\t\tdisplay version information\n"
                       "\t\t-O blocksize,rounds,variations\n"
+                      "\t\t-O [LMHX][LMHX][LMHX]\n"
                       "\t\t-d\t\tdecrypt\n"
                       "\t\t-r\t\trename input file to infile.bak\n"
                       "\t\t-R\t\treplace input file (dangerous!)\n"
                       "\t\t-n\t\tname output file as infile.{dec|enc} (default)\n"
                       "\t\t-v\t\tincrease verbosity\n"
                       "\t\t-P passphrase\n"
-                      "\t\t-m\t\tenable multithreading\n", stdout);
+                      "\t\t-m\t\tenable multithreading\n"
+                      "\t\t-D mask\t\tset debugging\n", stdout);
                 return 1;
         }
     }
@@ -185,17 +228,34 @@ int main(int argc, char **argv)
         return 9;
     }
     
-    binparm = parseints(parm);
-    
-    if(binparm[0]!=3)
+    if(strlen(parm)==3)    /* EASY */
     {
-        fprintf(stderr, "expected -O parameter options as triple numeric separated by commas\n");
+        binparm = parseeasy(parm, easysets);
+    }
+    else
+    {
+        binparm = parseints(parm);
+    }
+    
+    r=0;
+    for(i=1; i<binparm[0]; i++)
+        if(binparm[i]<1)
+            r=1;
+    
+    if(binparm[0]!=3 || r)
+    {
+        fprintf(stderr, "expected -O parameter as triple numeric separated by commas\nor three letters out of [LMHX]\n");
         return 9;
     }
     blksize = binparm[1];
     rounds = binparm[2];
     variations = binparm[3];
     FREE(binparm);
+    
+    if(verbosity>0)
+    {
+        printf("blksize=%lu rounds=%lu variations=%lu\n", blksize, rounds, variations);
+    }
     
     if(!passphrase)
         passphrase = getpass("PENG Password: ");

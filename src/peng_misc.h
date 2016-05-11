@@ -18,11 +18,17 @@
 */
 
 
+#if AVOID_ALLOCA
+#define MALLOC(x) chkmalloc(x)
+#define MALLOCA(x) chkmalloc(x)
+#define FREE(x) free(x)
+#define FREEA(x) free(x)
+#else
 #define MALLOC(x) chkmalloc(x)
 #define MALLOCA(x) alloca(x)
 #define FREE(x) free(x)
 #define FREEA(x)
-
+#endif
 
 
 void *chkmalloc(uint32_t x);

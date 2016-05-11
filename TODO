@@ -13,9 +13,11 @@ OPTIMIZATION
 
 LUXURY
  * store parameters with enc file
+ * make easy parameter sets
  * integrity checks
  * binary tarball / rpm / deb
  * src subdir and more advanced fs hierarchy
+ * exported API (libpeng)
 
 DOCUMENTATION
  * doxygen
@@ -46,7 +48,6 @@ PUBLIC
 
 
 DONE
- X exported API (libpeng)
  X CBC(X-P-X)
  X padding in peng_cmd_process()
  X verbosity>2 displays keys

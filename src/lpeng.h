@@ -19,6 +19,7 @@
 
 
 extern int verbosity;
+extern int debugmask;
 
 
 struct peng_cmd_environment
