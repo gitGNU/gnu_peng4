@@ -11,7 +11,7 @@ CFLAGS = -O3 -g -Wall -Wno-pointer-sign -std=c90 -D_GNU_SOURCE \
 LIBS = -pthread
 
 SOURCES= external/whirlpool.c external/mt19937ar.c external/sha2.c \
- peng_ref.c peng.c peng_misc.c lpeng.c
+ peng_ref.c peng.c peng_misc.c lpeng.c wolf64.c
 
 TARGETS= $(addsuffix .o, $(basename $(SOURCES)))
 

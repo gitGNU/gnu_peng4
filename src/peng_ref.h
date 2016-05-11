@@ -21,11 +21,11 @@
 struct pengset
 {
     uint32_t            blksize;
-    uint16_t     *perm1;
-    uint16_t     *perm2;
-    uint8_t      *mask1;
+    uint16_t           *perm1;
+    uint16_t           *perm2;
+    uint8_t            *mask1;
 #if USE_MODE_XPX
-    uint8_t      *mask2;
+    uint8_t            *mask2;
 #endif
 };
 
@@ -37,7 +37,7 @@ struct pengpipe
     uint32_t            variations;   /* x dimension */
     struct pengset   ***mtx;          /* 2d matrix */
 #if USE_MODE_CBC
-    uint8_t      *iv;
+    uint8_t            *iv;
 #endif
 };
 

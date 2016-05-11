@@ -64,28 +64,13 @@ int kjw_memcmp(const void *abuf0, const void *bbuf0, uint32_t sz0)
 
 
 /* TODO: this is POSIX (Linux) only */
-uint32_t do_padding(void *buf0, uint32_t sz0, const uint32_t *marker, uint32_t nmarker, uint32_t marker_byteoffset)
+uint32_t do_padding(void *buf0, uint32_t sz0)
 {
     FILE *f;
     register uint8_t *buf = (uint8_t *)buf0;
     register uint32_t sz = sz0;
     int c;
-    uint32_t i, r=0;
 
-    if(marker && nmarker)
-    {
-        i = nmarker*sizeof(uint32_t) - marker_byteoffset;
-        if(sz<i)
-        {
-            r = i - sz;
-            i = sz;
-        }
-        memcpy(buf, ((uint8_t *)marker)+marker_byteoffset, i);
-        
-        sz-=i;
-        buf+=i;
-    }
-    
     if(sz>0)
     {
         f = fopen("/dev/urandom", "r");
@@ -101,33 +86,7 @@ uint32_t do_padding(void *buf0, uint32_t sz0, const uint32_t *marker, uint32_t n
         }
         fclose(f);
     }
-    return r;
-}
-
-
-int locrr(void *buf, uint32_t sz, const uint32_t *marker, uint32_t nmarker, int minmatch)
-{
-    int pos = (int)sz-minmatch, n;
-    
-    nmarker *= sizeof(uint32_t);
-    for(; pos>=0; pos--)
-    {
-        n = sz-pos;
-        if(n>nmarker)
-            n = nmarker;
-        if(!kjw_memcmp(buf+pos, marker, n))
-            return pos;
-    }
-    /* now we try to find tails at pos=0 */
-    n=1;
-    for(n=1; nmarker-n>minmatch; n++)
-    {
-        if(!kjw_memcmp(buf, marker+n, nmarker-n))
-        {
-            return -n;
-        }
-    }
-    return -10000;  /* sigh, some number implausibly large and negative */
+    return 0;
 }
 
 

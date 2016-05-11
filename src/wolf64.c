@@ -17,7 +17,7 @@ uint32_t rotl32 (uint32_t n, unsigned int c)
   const unsigned int mask = (CHAR_BIT*sizeof(n)-1);
 
   assert ( (c<=mask) &&"rotate by type width or more");
-  c &= mask;  // avoid undef behaviour with NDEBUG.  0 overhead for most types / compilers
+  c &= mask;  /* avoid undef behaviour with NDEBUG.  0 overhead for most types / compilers */
   return (n<<c) | (n>>( (-c)&mask ));
 }
 
@@ -26,7 +26,7 @@ uint32_t rotr32 (uint32_t n, unsigned int c)
   const unsigned int mask = (CHAR_BIT*sizeof(n)-1);
 
   assert ( (c<=mask) &&"rotate by type width or more");
-  c &= mask;  // avoid undef behaviour with NDEBUG.  0 overhead for most types / compilers
+  c &= mask;  /* avoid undef behaviour with NDEBUG.  0 overhead for most types / compilers */
   return (n>>c) | (n<<( (-c)&mask ));
 }
 

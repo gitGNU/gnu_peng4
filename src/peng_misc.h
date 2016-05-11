@@ -37,9 +37,7 @@ int mymemcmp(const void *abuf0, const void *bbuf0, uint32_t sz0);
 
 void memxor(void *dst0, const void *src0, uint32_t sz0);
 
-uint32_t do_padding(void *buf0, uint32_t sz0, const uint32_t *marker, uint32_t nmarker, uint32_t marker_byteoffset);
-
-int locrr(void *buf, uint32_t sz, const uint32_t *marker, uint32_t nmarker, int minmatch);
+uint32_t do_padding(void *buf0, uint32_t sz0);
 
 uint32_t countconsecutivezeros(void *buf0, uint32_t sz);
 

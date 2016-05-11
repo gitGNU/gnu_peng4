@@ -10,18 +10,15 @@ COMPATIBILITY
 OPTIMIZATION
  * offset initialization for thread's Mersenne Twister (when generating mtx)
  * bit ordering (just again, but for what?)
+ * multithreading on mtx generation (-m changes the mtx now, why?)
 
 LUXURY
- * store parameters with enc file
- * make easy parameter sets
- * integrity checks
  * binary tarball / rpm / deb
  * src subdir and more advanced fs hierarchy
  * exported API (libpeng)
 
 DOCUMENTATION
  * doxygen
- * EOF marker warning
 
 DEBUG
  * debug system (flags)

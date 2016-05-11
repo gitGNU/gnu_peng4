@@ -24,11 +24,11 @@ extern int debugmask;
 
 struct peng_cmd_environment
 {
-    struct pengpipe *pp;
-    struct mersennetwister mt;
-    uint8_t *buf1, *buf2, *buf3;
-    uint32_t blksize, bufsize;
-    int eflag;
+    struct pengpipe         *pp;
+    struct mersennetwister   mt;
+    uint8_t                 *buf1, *buf2, *buf3;
+    uint32_t                 blksize, bufsize;
+    int                      eflag;
 };
 
 

@@ -314,7 +314,7 @@ int main(int argc, char **argv)
             perror(infn);
             return -1;
         }
-        h2 = open(outfn, O_WRONLY|O_CREAT|O_TRUNC, 0600);
+        h2 = open(outfn, O_RDWR|O_CREAT|O_TRUNC, 0600);
         if(h2<0)
         {
             perror(outfn);
@@ -335,6 +335,11 @@ int main(int argc, char **argv)
         close(h1);
         close(h2);
         
+        if(r==1)  /* checksum error */
+        {
+            fprintf(stderr, "%s: checksum mismatch\n", argv[i]);
+            return 10;
+        }
         if(r<0)
         {
             /* perror(argv[i]); <<< this is done in the process */

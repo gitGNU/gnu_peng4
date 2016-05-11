@@ -31,6 +31,7 @@
 #include "peng_ref.h"
 #include "sha2.h"
 #include "lpeng.h"
+#include "wolf64.h"
 
 
 /* global */ int verbosity = 0;
@@ -39,22 +40,15 @@
 static int init_done = 0;
 
 
-uint32_t eof_magic[] = { UINT32_C(0x1a68b01f), UINT32_C(0x4a11c153), UINT32_C(0x436621e9), UINT32_C(0xe710ffb4) };
-
-
 #define COMBINED_DIGEST_SIZE (WHIRLPOOL_DIGESTBYTES+SHA512_DIGEST_SIZE)
 
 
 void peng_unit_prep(void)
 {
-    int i;
-    
     if(init_done)
         return;
     init_done=1;
-    
-    for(i=0; i<(sizeof eof_magic/sizeof eof_magic[0]); i++)
-        eof_magic[i] = byte_reorder32(SYSTEM_BYTEORDER, TARGET_BYTEORDER, eof_magic[i], 4);
+    /* ... */
 }
 
 
@@ -99,16 +93,40 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, uint32_t blksize, uint32_t 
 }
 
 
+struct header
+  {
+      uint32_t        headerlen;
+      uint64_t        totalsize;
+      uint64_t        cksum;
+  };
+
 int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, uint64_t total, const char *outfn, int outh, char multithreading, char min_locrr_seq_len)
 {
-    int i,j,k,r,z;
-    int guess_eof = 0, truncate_at = 0;
-    uint32_t num=0, padding_remaining=0;
-    uint64_t pos=0;
+    int i,j,k,r;
+    int firstblock;
+    uint32_t num=0, off=0;
+    uint64_t pos=0, cksum;
+    struct header h;
     
     /* DEBUG_TIMING(1, "peng_cmd_process_0") */
+    
+    if(pce->eflag)
+    {
+        lseek(inh, 0, SEEK_SET);
+        h.cksum = wolf64(inh);
+        h.totalsize = lseek(inh, 0, SEEK_END);   /* it is already at the end... */
+        h.headerlen = sizeof h; 
+        lseek(inh, 0, SEEK_SET);
+        
+        h.headerlen = byte_reorder32(SYSTEM_BYTEORDER, TARGET_BYTEORDER, h.headerlen, 4);
+        h.totalsize = byte_reorder64(SYSTEM_BYTEORDER, TARGET_BYTEORDER, h.totalsize, 8);
+        h.cksum = byte_reorder64(SYSTEM_BYTEORDER, TARGET_BYTEORDER, h.cksum, 8);
+        
+        memcpy(pce->buf1, &h, sizeof h);
+        off = sizeof h;
+    }
 
-    for(;;)
+    for(firstblock=1; ; firstblock=0)
     {
         if(verbosity>1)
         {
@@ -117,32 +135,22 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
         }
         
         /* memset(pce->buf1, 0, pce->bufsize); */
-        i = read(inh, pce->buf1, pce->bufsize);
+        i = read(inh, pce->buf1+off, pce->bufsize-off);
         if(i<0)
         {
             perror(infn);
             return -1;
         }
         
+        i += off;
         if(i<=0)
             break;
         
-        pos += i;
-        if(total>0 && pos>=total)
-            guess_eof = 1;
+        off = 0;
         
         if(pce->eflag && i<pce->bufsize)
         {
-            /* Pad buffer with random data and mark EOF.
-             * special case: the input file matches the block size exactly; then:
-             * do NOT use a EOF magic
-             */
-            padding_remaining = do_padding(pce->buf1+i, pce->bufsize-i, eof_magic, sizeof eof_magic / sizeof eof_magic[0], 0);
-        }
-        
-        if(!pce->eflag && i<pce->bufsize)
-        {
-            fprintf(stderr, "warning: %s: expected a full block while reading for decryption\n", outfn);
+            do_padding(pce->buf1+i, pce->bufsize-i);
         }
         
         /* memset(pce->buf2, 0, pce->bufsize); */
@@ -152,68 +160,48 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
         
         k = pce->eflag?(pce->bufsize):i;
         
-        if(!pce->eflag && guess_eof)
+        if(!pce->eflag && firstblock)
         {
-            /* Find the EOF marker.
-             */
-            z = locrr(pce->buf3, k, eof_magic, sizeof eof_magic / sizeof eof_magic[0], min_locrr_seq_len);
-            if(z>=-9999)   /* legal value */
-            {
-                if(verbosity>1)
-                    fprintf(stderr, "applying guess_eof at z=%d\n", z);
-                if(z>=0)
-                    k = z;
-                else
-                {
-                    /* z is negative and valid, that means the start of the marker was in the previous block */
-                    k = 0;
-                    truncate_at = z;
-                    break;
-                }
-            }
+            /* read the header */
+            memcpy(&h, pce->buf3, sizeof h);
+            off = sizeof h;
+
+            h.headerlen = byte_reorder32(TARGET_BYTEORDER, SYSTEM_BYTEORDER, h.headerlen, 4);
+            h.totalsize = byte_reorder64(TARGET_BYTEORDER, SYSTEM_BYTEORDER, h.totalsize, 8);
+            h.cksum = byte_reorder64(TARGET_BYTEORDER, SYSTEM_BYTEORDER, h.cksum, 8);
         }
         
-        j = write(outh, pce->buf3, k);
+        j = write(outh, pce->buf3+off, k-off);
         if(j<0)
         {
             perror(outfn);
             return -1;
         }
-        if(k!=j)
+        if(k-off!=j)
         {
             fprintf(stderr, "warning: %s: bytes buffered not equal bytes written\n", outfn);
         }
-        if(guess_eof)
-            break;    /* this is to avoid some tricky problems (with growing files) */
+        off = 0;
     }
-    /* if(!pce->eflag && guess_eof && k==0 && z<0 && z>=-9999) */
-    if(truncate_at)
+
+    if(!pce->eflag)
     {
         pos = lseek(outh, 0, SEEK_CUR);
         lseek(outh, 0, SEEK_SET);
-        r = ftruncate(outh, pos-truncate_at);
-        if(r)
+        if(pos>h.totalsize)
         {
-            perror(outfn);
-            return -1;
+            r = ftruncate(outh, h.totalsize);
+            if(r)
+            {
+                perror(outfn);
+                return -1;
+            }
         }
-    }
-    else
-    if(padding_remaining)  /* encrypting */
-    {
-        do_padding(pce->buf1, pce->bufsize, eof_magic, sizeof eof_magic / sizeof eof_magic[0], padding_remaining);
-        execpengpipe(pce->pp, pce->buf1, pce->buf2, pce->buf3, pce->eflag, multithreading);
-        k = pce->bufsize;
-        j = write(outh, pce->buf3, k);
-        if(j<0)
-        {
-            perror(outfn);
-            return -1;
-        }
-        if(k!=j)
-        {
-            fprintf(stderr, "warning: %s: bytes buffered not equal bytes written (fin)\n", outfn);
-        }
+        lseek(outh, 0, SEEK_SET);
+        cksum = wolf64(outh);
+        fprintf(stderr, "DEBUG: %08lx (now) %08lx (stored)\n", cksum, h.cksum); 
+        if(cksum!=h.cksum)
+            return 1;
     }
     
     /* DEBUG_TIMING(1, "peng_cmd_process_1") */
