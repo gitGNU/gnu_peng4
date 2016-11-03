@@ -1,12 +1,14 @@
-DEFS = -DDORKINESS=0 -DSKIP_XOR=0 -DSKIP_PERMUT=0 -DDEBUG=0 -DBETA=1 -DALPHA=0 \
+DEFS = -DDORKINESS=0 -DSKIP_XOR=0 -DSKIP_PERMUT=0 -DDEBUG=1 -DBETA=1 -DALPHA=0 \
  -DUSE_MODE_XPX=1 -DUSE_MODE_CBC=1 -DLINUX=1 -DTESTARCH=0 -DAVOID_ALLOCA=1
 
-CFLAGS = -O3 -g -Wall -Wno-pointer-sign -std=c90 -D_GNU_SOURCE \
- -I. -Iexternal/ -Lexternal/
+CFLAGS = -O3 -gdwarf-3 -Wall -Wno-pointer-sign -std=c90 -D_GNU_SOURCE \
+ -I. -Iexternal/ -Lexternal/ -fstack-protector
 #CFLAGS = -ggdb -Wall -Wno-pointer-sign -std=c90 -D_GNU_SOURCE \
-# -I. -Iexternal/ -Lexternal/
+# -I. -Iexternal/ -Lexternal/ -fstack-protector
+#CFLAGS = -gdwarf-3 -Wall -Wno-pointer-sign -std=c90 -D_GNU_SOURCE \
+# -I. -Iexternal/ -Lexternal/ -fstack-protector
 #CFLAGS = -pg -ggdb -Wall -Wno-pointer-sign -std=c90 -D_GNU_SOURCE \
-# -I. -Iexternal/ -Lexternal/
+# -I. -Iexternal/ -Lexternal/ -fstack-protector
 
 LIBS = -pthread
 
@@ -15,7 +17,8 @@ SOURCES= external/whirlpool.c external/mt19937ar.c external/sha2.c \
 
 TARGETS= $(addsuffix .o, $(basename $(SOURCES)))
 
-EXTRA= TODO README LICENSE CHANGELOG
+#EXTRA= TODO README LICENSE CHANGELOG
+EXTRA=
 
 ##############################################################################
 
@@ -61,3 +64,6 @@ tarball: $(SOURCES)
 	./scripts/000_genbsd_shebang.sh
 	./scripts/mktarball.sh peng4-$(shell ./scripts/getver.sh).tar.bz2 Makefile* $(EXTRA) *.c *.h scripts/* external/* docs/*
 
+
+testfile:
+	ln testdata/h_128mib testfile

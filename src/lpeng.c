@@ -108,6 +108,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
     uint64_t pos=0, cksum;
     struct header h;
     
+    memset(&h, 0, sizeof h);
     /* DEBUG_TIMING(1, "peng_cmd_process_0") */
     
     if(pce->eflag)

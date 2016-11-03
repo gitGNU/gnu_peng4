@@ -10,7 +10,7 @@ fi
 
 if [[ ! -e testdata/c_sources ]]
 then
- KERNEL=/xmisc/storage/Aureolis/sources/linux-3.19.tar.xz
+ KERNEL=~/Downloads/linux-4.4.30.tar.xz
  TMPDIR=/var/tmp/$$
  mkdir $TMPDIR
  tar -xJf $KERNEL -C $TMPDIR

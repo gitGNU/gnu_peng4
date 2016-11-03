@@ -66,7 +66,7 @@ static void qbitcopy(const uint8_t *buf1, uint32_t off1, uint32_t max1, uint8_t 
 {
     if(off1/8>=max1 || off2/8>=max2)
     {
-        fprintf(stderr, "PANIC: %u>%u or %u>%u\n", off1/8, max1, off2/8, max2);
+        fprintf(stderr, "PANIC: %u>=%u or %u>=%u\n", off1/8, max1, off2/8, max2);
         abort();
     }
     
@@ -273,17 +273,29 @@ void execpengset(struct pengset *p, const uint8_t *buf1, uint8_t *tmpbuf, uint8_
 
 struct epp_thr_context
 {
-    struct pengset    **mtx;
-    uint32_t            rounds;
-    uint32_t            blksize;
-    uint8_t      *buf1;
-    uint8_t      *tmpbuf;
-    uint8_t      *buf2;
+    struct pengset        **mtx;
+    uint32_t                rounds;
+    uint32_t                blksize;
+    uint8_t                *buf1;
+    uint8_t                *tmpbuf;
+    uint8_t                *buf2;
     char encrypt;
 #if USE_MODE_CBC
-    uint8_t      *iv;
+    uint8_t                *iv;
 #endif
 };
+
+
+struct rnd_thr_context
+{
+    struct mersennetwister *mt;
+    int                     wrh;
+};
+
+
+static void *rnd_thr(void *param)
+{
+}
 
 
 static void *epp_thr(void *param)
