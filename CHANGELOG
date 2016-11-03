@@ -23,3 +23,10 @@ DATE         VERSION
 armeb architecture test with arbitrary target order settings:
 PASSED :-)
 
+**********************
+DATE         VERSION
+2016-11-03   4.01.0073
+
+fixed bug: uninitialized memory
+persisting problem: block sizes larger 9000 fail with decryption
+
