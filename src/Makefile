@@ -17,8 +17,7 @@ SOURCES= external/whirlpool.c external/mt19937ar.c external/sha2.c \
 
 TARGETS= $(addsuffix .o, $(basename $(SOURCES)))
 
-#EXTRA= TODO README LICENSE CHANGELOG
-EXTRA=
+EXTRA= TODO README LICENSE CHANGELOG
 
 ##############################################################################
 

@@ -22,4 +22,5 @@ then
     fi
 fi
 
-mv $ARC* tarball
+mkdir -p ../tarball
+mv $ARC* ../tarball
