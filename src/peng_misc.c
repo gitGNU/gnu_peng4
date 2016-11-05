@@ -110,6 +110,19 @@ uint32_t countconsecutivezeros(void *buf0, uint32_t sz)
 }
 
 
+static uint16_t amask16(char c)
+{
+    switch(c)
+    {
+        case '0':
+            return UINT16_C(0x00ff);
+        case '1':
+            return UINT16_C(0xff00);
+    }
+    return 0;
+}
+
+
 static uint32_t amask32(char c)
 {
     switch(c)
@@ -187,20 +200,37 @@ static uint32_t doshift(uint32_t v, int n)
 }
 
 
+#define REORDER16(f,t,i,j) j |= doshift(i&amask16(f), ashift(f)-ashift(t));
+
+
+uint16_t byte_reorder16(const char *from_order, const char *to_order, uint16_t from)
+{
+    uint16_t res = 0;
+    
+    if(!strcmp(from_order,to_order))
+        return from;
+    
+    REORDER16(from_order[0], to_order[0], from, res)
+    REORDER16(from_order[1], to_order[1], from, res)
+
+    return res;
+}
+
+
 #define REORDER32(f,t,i,j) j |= doshift(i&amask32(f), ashift(f)-ashift(t));
 
 
-uint32_t byte_reorder32(const char *from_order, const char *to_order, uint32_t from, int bytes)
+uint32_t byte_reorder32(const char *from_order, const char *to_order, uint32_t from)
 {
     uint32_t res = 0;
     
     if(!strcmp(from_order,to_order))
         return from;
     
-    if(bytes>0) REORDER32(from_order[0], to_order[0], from, res)
-    if(bytes>1)  REORDER32(from_order[1], to_order[1], from, res)
-    if(bytes>2)  REORDER32(from_order[2], to_order[2], from, res)
-    if(bytes>3)  REORDER32(from_order[3], to_order[3], from, res)
+    REORDER32(from_order[0], to_order[0], from, res)
+    REORDER32(from_order[1], to_order[1], from, res)
+    REORDER32(from_order[2], to_order[2], from, res)
+    REORDER32(from_order[3], to_order[3], from, res)
 
     return res;
 }
@@ -209,34 +239,34 @@ uint32_t byte_reorder32(const char *from_order, const char *to_order, uint32_t f
 #define REORDER64(f,t,i,j) j |= doshift(i&amask64(f), ashift(f)-ashift(t));
 
 
-uint64_t byte_reorder64(const char *from_order, const char *to_order, uint64_t from, int bytes)
+uint64_t byte_reorder64(const char *from_order, const char *to_order, uint64_t from)
 {
     uint64_t res = 0;
     
     if(!strcmp(from_order,to_order))
         return from;
     
-    if(bytes>0) REORDER64(from_order[0], to_order[0], from, res)
-    if(bytes>1)  REORDER64(from_order[1], to_order[1], from, res)
-    if(bytes>2)  REORDER64(from_order[2], to_order[2], from, res)
-    if(bytes>3)  REORDER64(from_order[3], to_order[3], from, res)
-    if(bytes>3)  REORDER64(from_order[4], to_order[4], from, res)
-    if(bytes>4)  REORDER64(from_order[5], to_order[5], from, res)
-    if(bytes>5)  REORDER64(from_order[6], to_order[6], from, res)
-    if(bytes>6)  REORDER64(from_order[7], to_order[7], from, res)
+    REORDER64(from_order[0], to_order[0], from, res)
+    REORDER64(from_order[1], to_order[1], from, res)
+    REORDER64(from_order[2], to_order[2], from, res)
+    REORDER64(from_order[3], to_order[3], from, res)
+    REORDER64(from_order[4], to_order[4], from, res)
+    REORDER64(from_order[5], to_order[5], from, res)
+    REORDER64(from_order[6], to_order[6], from, res)
+    REORDER64(from_order[7], to_order[7], from, res)
 
     return res;
 }
 
 
 
-void rectify(const char *from_order, const char *to_order, void *ptr, int numbytes)
+void rectify32(const char *from_order, const char *to_order, void *ptr, int numbytes)
 {
     uint32_t x;
     
     while(numbytes>0)
     {
-        x = byte_reorder32(from_order, to_order, *(uint32_t *)ptr, numbytes);
+        x = byte_reorder32(from_order, to_order, *(uint32_t *)ptr);
         *(uint32_t *)ptr = x;
         numbytes -= sizeof(uint32_t);
         ptr = (void *)(((uint8_t *) ptr) + sizeof(uint32_t));

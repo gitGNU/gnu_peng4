@@ -171,7 +171,7 @@ struct pengpipe *genpengpipe(uint32_t blksize, uint32_t rounds, uint32_t variati
         {
             if(verbosity>1)
             {
-                printf("generating variation=%d, round=%d  \r", i, j);
+                printf("generating variation=%d, round=%d  \r", i+1, j+1);
                 fflush(stdout);
             }
             res->mtx[i][j] = genpengset(blksize, mt);

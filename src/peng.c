@@ -254,7 +254,7 @@ int main(int argc, char **argv)
     
     if(verbosity>0)
     {
-        printf("blksize=%lu rounds=%lu variations=%lu\n", blksize, rounds, variations);
+        printf("blksize=%lu variations=%lu rounds=%lu\n", blksize, variations, rounds);
     }
     
     if(!passphrase)
@@ -335,9 +335,19 @@ int main(int argc, char **argv)
         close(h1);
         close(h2);
         
-        if(r==1)  /* checksum error */
+        if(r>0)  /* checksum error */
         {
-            fprintf(stderr, "%s: checksum mismatch\n", argv[i]);
+            switch(r)
+            {
+                case 1:
+                    fprintf(stderr, "%s: checksum mismatch\n", argv[i]);
+                    break;
+                case 2:
+                    fprintf(stderr, "%s: magic missing (password wrong?)\n", argv[i]);
+                    break;
+                case 3:
+                    fprintf(stderr, "%s: compatibility (version or capabilities) failure\n", argv[i]);
+                    break;
             return 10;
         }
         if(r<0)

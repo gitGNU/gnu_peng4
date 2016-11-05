@@ -41,6 +41,9 @@ static int init_done = 0;
 
 
 #define COMBINED_DIGEST_SIZE (WHIRLPOOL_DIGESTBYTES+SHA512_DIGEST_SIZE)
+#define PENG_MAGIC UINT32_C(0xec1f4a11)
+#define PENG_VER UINT16_C(0)
+#define PENG_CAP UINT16_C(0)
 
 
 void peng_unit_prep(void)
@@ -74,7 +77,7 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, uint32_t blksize, uint32_t 
     memcpy(combined, digest, WHIRLPOOL_DIGESTBYTES);
     memcpy(combined+WHIRLPOOL_DIGESTBYTES, digest2, SHA512_DIGEST_SIZE);
     
-    rectify(SYSTEM_BYTEORDER, TARGET_BYTEORDER, combined, COMBINED_DIGEST_SIZE);
+    rectify32(SYSTEM_BYTEORDER32, TARGET_BYTEORDER32, combined, COMBINED_DIGEST_SIZE);
     
     mersennetwister_init_by_array(&pce->mt, (uint32_t *)combined, COMBINED_DIGEST_SIZE/sizeof(uint32_t));  /* TODO byte order, packing */
     
@@ -95,7 +98,10 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, uint32_t blksize, uint32_t 
 
 struct header
   {
+      uint32_t        magic;
       uint32_t        headerlen;
+      uint16_t        ver;
+      uint16_t        cap;
       uint64_t        totalsize;
       uint64_t        cksum;
   };
@@ -107,8 +113,10 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
     uint32_t num=0, off=0;
     uint64_t pos=0, cksum;
     struct header h;
+    struct header hwrit;
     
-    memset(&h, 0, sizeof h);
+    memset(&h, 0, sizeof h);  /* valgrind owed */
+    memset(&hwrit, 0, sizeof hwrit);
     /* DEBUG_TIMING(1, "peng_cmd_process_0") */
     
     if(pce->eflag)
@@ -117,13 +125,19 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
         h.cksum = wolf64(inh);
         h.totalsize = lseek(inh, 0, SEEK_END);   /* it is already at the end... */
         h.headerlen = sizeof h; 
+        h.magic = PENG_MAGIC;
+        h.cap = PENG_CAP;
+        h.ver = PENG_VER;
         lseek(inh, 0, SEEK_SET);
         
-        h.headerlen = byte_reorder32(SYSTEM_BYTEORDER, TARGET_BYTEORDER, h.headerlen, 4);
-        h.totalsize = byte_reorder64(SYSTEM_BYTEORDER, TARGET_BYTEORDER, h.totalsize, 8);
-        h.cksum = byte_reorder64(SYSTEM_BYTEORDER, TARGET_BYTEORDER, h.cksum, 8);
+        hwrit.headerlen = cvt_from_system64(h.headerlen);
+        hwrit.totalsize = cvt_from_system64(h.totalsize);
+        hwrit.cksum = cvt_from_system64(h.cksum);
+        hwrit.magic = cvt_from_system32(h.magic);
+        hwrit.cap = cvt_from_system16(h.cap);
+        hwrit.ver = cvt_from_system16(h.ver);
         
-        memcpy(pce->buf1, &h, sizeof h);
+        memcpy(pce->buf1, &hwrit, sizeof hwrit);
         off = sizeof h;
     }
 
@@ -167,9 +181,22 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
             memcpy(&h, pce->buf3, sizeof h);
             off = sizeof h;
 
-            h.headerlen = byte_reorder32(TARGET_BYTEORDER, SYSTEM_BYTEORDER, h.headerlen, 4);
-            h.totalsize = byte_reorder64(TARGET_BYTEORDER, SYSTEM_BYTEORDER, h.totalsize, 8);
-            h.cksum = byte_reorder64(TARGET_BYTEORDER, SYSTEM_BYTEORDER, h.cksum, 8);
+            h.ver = cvt_to_system16(h.ver);
+            h.cap = cvt_to_system16(h.cap);
+            h.magic = cvt_to_system32(h.magic);
+            h.headerlen = cvt_to_system32(h.headerlen);
+            h.totalsize = cvt_to_system64(h.totalsize);
+            h.cksum = cvt_to_system64(h.cksum);
+            if(h.magic!=PENG_MAGIC)
+            {
+                fprintf(stderr, "DEBUG: FAILED: ver=%"PRIx16" cap=%"PRIx16" magic=%"PRIx32"\n", h.ver, h.cap, h.magic); 
+                return 2;
+            }
+            if(h.ver>PENG_VER || h.cap!=PENG_CAP)
+            {
+                fprintf(stderr, "DEBUG: FAILED: ver=%"PRIx16" cap=%"PRIx16" magic=%"PRIx32"\n", h.ver, h.cap, h.magic); 
+                return 3;
+            }
         }
         
         j = write(outh, pce->buf3+off, k-off);
@@ -187,10 +214,12 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
 
     if(!pce->eflag)
     {
+        fprintf(stderr, "DEBUG: h.totalsize = %"PRIu64"\n", h.totalsize);
         pos = lseek(outh, 0, SEEK_CUR);
         lseek(outh, 0, SEEK_SET);
         if(pos>h.totalsize)
         {
+            fprintf(stderr, "DEBUG: ftruncate() to %"PRIu64"\n", h.totalsize);
             r = ftruncate(outh, h.totalsize);
             if(r)
             {
@@ -198,9 +227,9 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
                 return -1;
             }
         }
-        lseek(outh, 0, SEEK_SET);
+        lseek(outh, 0, SEEK_SET); /* some ftruncate()s work by re-positioning */
         cksum = wolf64(outh);
-        fprintf(stderr, "DEBUG: %08lx (now) %08lx (stored)\n", cksum, h.cksum); 
+        fprintf(stderr, "DEBUG: %08lx (now) %"PRIx64" (stored)\n", cksum, h.cksum); 
         if(cksum!=h.cksum)
             return 1;
     }
