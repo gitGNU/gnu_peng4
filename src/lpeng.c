@@ -189,12 +189,12 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
             h.cksum = cvt_to_system64(h.cksum);
             if(h.magic!=PENG_MAGIC)
             {
-                fprintf(stderr, "DEBUG: FAILED: ver=%"PRIx16" cap=%"PRIx16" magic=%"PRIx32"\n", h.ver, h.cap, h.magic); 
+                /* fprintf(stderr, "DEBUG: FAILED: ver=%"PRIx16" cap=%"PRIx16" magic=%"PRIx32"\n", h.ver, h.cap, h.magic); */
                 return 2;
             }
             if(h.ver>PENG_VER || h.cap!=PENG_CAP)
             {
-                fprintf(stderr, "DEBUG: FAILED: ver=%"PRIx16" cap=%"PRIx16" magic=%"PRIx32"\n", h.ver, h.cap, h.magic); 
+                /* fprintf(stderr, "DEBUG: FAILED: ver=%"PRIx16" cap=%"PRIx16" magic=%"PRIx32"\n", h.ver, h.cap, h.magic);  */
                 return 3;
             }
         }
@@ -214,12 +214,12 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
 
     if(!pce->eflag)
     {
-        fprintf(stderr, "DEBUG: h.totalsize = %"PRIu64"\n", h.totalsize);
+        /* fprintf(stderr, "DEBUG: h.totalsize = %"PRIu64"\n", h.totalsize); */
         pos = lseek(outh, 0, SEEK_CUR);
         lseek(outh, 0, SEEK_SET);
         if(pos>h.totalsize)
         {
-            fprintf(stderr, "DEBUG: ftruncate() to %"PRIu64"\n", h.totalsize);
+            /* fprintf(stderr, "DEBUG: ftruncate() to %"PRIu64"\n", h.totalsize); */
             r = ftruncate(outh, h.totalsize);
             if(r)
             {
@@ -229,7 +229,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
         }
         lseek(outh, 0, SEEK_SET); /* some ftruncate()s work by re-positioning */
         cksum = wolf64(outh);
-        fprintf(stderr, "DEBUG: %08lx (now) %"PRIx64" (stored)\n", cksum, h.cksum); 
+        /* fprintf(stderr, "DEBUG: %08lx (now) %"PRIx64" (stored)\n", cksum, h.cksum); */
         if(cksum!=h.cksum)
             return 1;
     }
