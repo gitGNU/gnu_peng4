@@ -20,9 +20,9 @@
 
 struct pengset
 {
-    uint32_t            blksize;
-    uint16_t           *perm1;
-    uint16_t           *perm2;
+    uint64_t            blksize;
+    uint32_t           *perm1;
+    uint32_t           *perm2;
     uint8_t            *mask1;
 #if USE_MODE_XPX
     uint8_t            *mask2;
@@ -32,7 +32,7 @@ struct pengset
 
 struct pengpipe
 {
-    uint32_t            blksize;
+    uint64_t            blksize;
     uint32_t            rounds;       /* y dimension */
     uint32_t            variations;   /* x dimension */
     struct pengset   ***mtx;          /* 2d matrix */
@@ -43,10 +43,10 @@ struct pengpipe
 
 
 
-struct pengset *genpengset(uint32_t blksize, struct mersennetwister *mt);
-struct pengpipe *genpengpipe(uint32_t blksize, uint32_t rounds, uint32_t variations, struct mersennetwister *mt);
+struct pengset *genpengset(uint64_t blksize, struct mersennetwister *mt);
+struct pengpipe *genpengpipe(uint64_t blksize, uint32_t rounds, uint32_t variations, struct mersennetwister *mt);
 void destroypengset(struct pengset *p);
 void destroypengpipe(struct pengpipe *p);
 void execpengset(struct pengset *p, const uint8_t *buf1, uint8_t *tmpbuf, uint8_t *buf2, char encrypt);
 void execpengpipe(struct pengpipe *p, uint8_t *buf1, uint8_t *tmpbuf, uint8_t *buf2, char encrypt, char threads_flag);
-uint32_t getbufsize(struct pengpipe *p);
+uint64_t getbufsize(struct pengpipe *p);

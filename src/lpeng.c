@@ -56,7 +56,7 @@ void peng_unit_prep(void)
 
 
 /* attention ! passphrase will be erased ! */
-void peng_cmd_prep(struct peng_cmd_environment *pce, uint32_t blksize, uint32_t rounds, uint32_t variations, char *passphrase, int eflag)
+void peng_cmd_prep(struct peng_cmd_environment *pce, uint64_t blksize, uint32_t rounds, uint32_t variations, char *passphrase, int eflag)
 {
     struct whirlpool wp;
     sha512_ctx sha512;

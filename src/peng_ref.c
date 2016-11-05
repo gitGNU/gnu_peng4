@@ -80,9 +80,9 @@ static void qbitcopy(const uint8_t *buf1, uint32_t off1, uint32_t max1, uint8_t 
 #endif
 
 
-struct pengset *genpengset(uint32_t blksize, struct mersennetwister *mt)
+struct pengset *genpengset(uint64_t blksize, struct mersennetwister *mt)
 {
-    uint32_t blksize8 = blksize*8;
+    uint64_t blksize8 = blksize*8;
     struct pengset *res = MALLOC(sizeof(struct pengset));
     char *tempflg1 = MALLOCA(blksize8*sizeof(char));
     char *tempflg2 = MALLOCA(blksize8*sizeof(char));
@@ -91,14 +91,14 @@ struct pengset *genpengset(uint32_t blksize, struct mersennetwister *mt)
     memset(tempflg1, 0, blksize8*sizeof(char));
     memset(tempflg2, 0, blksize8*sizeof(char));
     res->blksize = blksize;
-    res->perm1 = MALLOC(blksize8*sizeof(uint16_t));
-    res->perm2 = MALLOC(blksize8*sizeof(uint16_t));
+    res->perm1 = MALLOC(blksize8*sizeof(uint32_t));
+    res->perm2 = MALLOC(blksize8*sizeof(uint32_t));
     res->mask1  = MALLOC(blksize*sizeof(uint8_t));
 #if USE_MODE_XPX
     res->mask2  = MALLOC(blksize*sizeof(uint8_t));
 #endif
-    memset(res->perm1, 0, blksize8*sizeof(uint16_t));
-    memset(res->perm2, 0, blksize8*sizeof(uint16_t));
+    memset(res->perm1, 0, blksize8*sizeof(uint32_t));
+    memset(res->perm2, 0, blksize8*sizeof(uint32_t));
     
     /* DEBUG_TIMING(1, "genpengset_0") */
     
@@ -152,7 +152,7 @@ struct pengset *genpengset(uint32_t blksize, struct mersennetwister *mt)
 }
 
 
-struct pengpipe *genpengpipe(uint32_t blksize, uint32_t rounds, uint32_t variations, struct mersennetwister *mt)
+struct pengpipe *genpengpipe(uint64_t blksize, uint32_t rounds, uint32_t variations, struct mersennetwister *mt)
 {
     int i,j;
     struct pengpipe *res = MALLOC(sizeof(struct pengpipe));
@@ -226,8 +226,8 @@ void destroypengpipe(struct pengpipe *p)
 
 void execpengset(struct pengset *p, const uint8_t *buf1, uint8_t *tmpbuf, uint8_t *buf2, char encrypt)
 {
-    uint32_t blksize = p->blksize;
-    uint32_t blksize8 = blksize*8;
+    uint64_t blksize = p->blksize;
+    uint64_t blksize8 = blksize*8;
     int i;
     
     if(encrypt)
@@ -275,7 +275,7 @@ struct epp_thr_context
 {
     struct pengset        **mtx;
     uint32_t                rounds;
-    uint32_t                blksize;
+    uint64_t                blksize;
     uint8_t                *buf1;
     uint8_t                *tmpbuf;
     uint8_t                *buf2;
@@ -286,6 +286,7 @@ struct epp_thr_context
 };
 
 
+/**************************************
 struct rnd_thr_context
 {
     struct mersennetwister *mt;
@@ -295,7 +296,9 @@ struct rnd_thr_context
 
 static void *rnd_thr(void *param)
 {
+    return NULL;
 }
+**************************************/
 
 
 static void *epp_thr(void *param)
@@ -412,7 +415,7 @@ void execpengpipe(struct pengpipe *p, uint8_t *buf1, uint8_t *tmpbuf, uint8_t *b
 }
 
 
-uint32_t getbufsize(struct pengpipe *p)
+uint64_t getbufsize(struct pengpipe *p)
 {
-    return (uint32_t)p->blksize * p->variations;
+    return (uint64_t)p->blksize * p->variations;
 }

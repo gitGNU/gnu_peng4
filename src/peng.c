@@ -148,7 +148,8 @@ int main(int argc, char **argv)
     int delflag;
     char fnmode = 'n';
     uint32_t *binparm;
-    uint32_t blksize, rounds, variations;
+    uint64_t blksize;
+    uint32_t rounds, variations;
     struct peng_cmd_environment mypce;
     char *origfn, infn[MAXFNLEN], outfn[MAXFNLEN], *passphrase=NULL;
     uint64_t total;
@@ -254,7 +255,7 @@ int main(int argc, char **argv)
     
     if(verbosity>0)
     {
-        printf("blksize=%lu variations=%lu rounds=%lu\n", blksize, variations, rounds);
+        printf("blksize=%"PRIu64" variations=%"PRIu32" rounds=%"PRIu32"\n", blksize, variations, rounds);
     }
     
     if(!passphrase)
@@ -348,6 +349,7 @@ int main(int argc, char **argv)
                 case 3:
                     fprintf(stderr, "%s: compatibility (version or capabilities) failure\n", argv[i]);
                     break;
+            }
             return 10;
         }
         if(r<0)
