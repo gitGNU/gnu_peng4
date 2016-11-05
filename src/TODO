@@ -2,15 +2,17 @@ BUGS
  * require double password entry on encryption
 
 COMPATIBILITY
- * delete then open new files
+ * delete, then open new files
  * byte order (alignment?) - implement rectify()
  * block encryption API (for things like TrueCrypt or dm-crypt)
  * l(ib)peng: no output to stderr
  * maintain BSD compatibility; verify stdint.h (inttypes.h)
  * save complete format in header
+ * disable USE_XYZ compile time configuration
 
 SECURITY
  * erase mtx from memory
+ * unfold repetitions (according to classical block cipher scheme)
 
 OPTIMIZATION
  * offset initialization for thread's Mersenne Twister (when generating mtx)
