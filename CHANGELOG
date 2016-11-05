@@ -30,3 +30,11 @@ DATE         VERSION
 fixed bug: uninitialized memory
 persisting problem: block sizes larger 9000 fail with decryption
 
+**********************
+DATE         VERSION
+2016-11-03   4.01.0074
+
+fixed: wrong types used
+en/decryption with -m now works the same
+HLL, XLL work
+
