@@ -33,8 +33,8 @@ struct pengset
 struct pengpipe
 {
     uint64_t            blksize;
-    uint32_t            rounds;       /* y dimension */
-    uint32_t            variations;   /* x dimension */
+    uint16_t            rounds;       /* y dimension */
+    uint16_t            variations;   /* x dimension */
     struct pengset   ***mtx;          /* 2d matrix */
 #if USE_MODE_CBC
     uint8_t            *iv;

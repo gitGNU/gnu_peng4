@@ -2,17 +2,18 @@ BUGS
  * require double password entry on encryption
 
 COMPATIBILITY
- * delete, then open new files
+ * delete, then open new files (break links)
  * byte order (alignment?) - implement rectify()
  * block encryption API (for things like TrueCrypt or dm-crypt)
- * l(ib)peng: no output to stderr
  * maintain BSD compatibility; verify stdint.h (inttypes.h)
- * save complete format in header
  * disable USE_XYZ compile time configuration
 
 SECURITY
  * erase mtx from memory
  * unfold repetitions (according to classical block cipher scheme)
+
+SECURITY (MINOR)
+ * erase buffers after use
 
 OPTIMIZATION
  * offset initialization for thread's Mersenne Twister (when generating mtx)
@@ -34,9 +35,6 @@ DEBUG
  * get rid of testing defines
  * better Makefile concept (maybe cmake?) for generating flavoured bins
    without need to edit the Makefile
-
-SECURITY (MINOR)
- * erase buffers after use
 
 TEST
  * automated test (write some tools and create a test parameter table)

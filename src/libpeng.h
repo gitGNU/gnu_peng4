@@ -22,6 +22,22 @@ extern int verbosity;
 extern int debugmask;
 
 
+struct peng_file_header
+{
+    uint32_t        magic;
+    uint32_t        headerlen;
+    uint16_t        ver;
+    uint16_t        cap;
+    uint64_t        totalsize;
+    uint64_t        cksum;
+    /*
+    uint64_t        blksize;
+    uint16_t        rounds;
+    uint16_t        variations;
+    */
+    uint32_t        extra;       /* as of now, this is just meaningless padding */
+};
+
 struct peng_cmd_environment
 {
     struct pengpipe         *pp;
@@ -29,6 +45,7 @@ struct peng_cmd_environment
     uint8_t                 *buf1, *buf2, *buf3;
     uint64_t                 blksize, bufsize;
     int                      eflag;
+    struct peng_file_header  htrx;
 };
 
 

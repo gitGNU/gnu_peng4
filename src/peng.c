@@ -35,7 +35,7 @@
 #include "whirlpool.h"
 #include "mt19937ar.h"
 #include "peng_ref.h"
-#include "lpeng.h"
+#include "libpeng.h"
 
 
 #define LICENSE "This program comes with ABSOLUTELY NO WARRANTY.\nLicensed under the GNU Public License version 3 or later.\n"
@@ -255,7 +255,7 @@ int main(int argc, char **argv)
     
     if(verbosity>0)
     {
-        printf("blksize=%"PRIu64" variations=%"PRIu32" rounds=%"PRIu32"\n", blksize, variations, rounds);
+        printf("blksize=%" PRIu64 " variations=%" PRIu32 " rounds=%" PRIu32 "\n", blksize, variations, rounds);
     }
     
     if(!passphrase)

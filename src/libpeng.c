@@ -30,7 +30,7 @@
 #include "peng_misc.h"
 #include "peng_ref.h"
 #include "sha2.h"
-#include "lpeng.h"
+#include "libpeng.h"
 #include "wolf64.h"
 
 
@@ -96,24 +96,14 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, uint64_t blksize, uint32_t 
 }
 
 
-struct header
-  {
-      uint32_t        magic;
-      uint32_t        headerlen;
-      uint16_t        ver;
-      uint16_t        cap;
-      uint64_t        totalsize;
-      uint64_t        cksum;
-  };
-
 int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, uint64_t total, const char *outfn, int outh, char multithreading, char min_locrr_seq_len)
 {
     int i,j,k,r;
     int firstblock;
     uint32_t num=0, off=0;
     uint64_t pos=0, cksum;
-    struct header h;
-    struct header hwrit;
+    struct peng_file_header h;
+    struct peng_file_header hwrit;
     
     memset(&h, 0, sizeof h);  /* valgrind owed */
     memset(&hwrit, 0, sizeof hwrit);
@@ -128,6 +118,8 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
         h.magic = PENG_MAGIC;
         h.cap = PENG_CAP;
         h.ver = PENG_VER;
+        
+        memcpy(&pce->htrx, &h, sizeof(pce->htrx));
         lseek(inh, 0, SEEK_SET);
         
         hwrit.headerlen = cvt_from_system64(h.headerlen);
@@ -187,6 +179,9 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
             h.headerlen = cvt_to_system32(h.headerlen);
             h.totalsize = cvt_to_system64(h.totalsize);
             h.cksum = cvt_to_system64(h.cksum);
+            
+            memcpy(&pce->htrx, &h, sizeof(pce->htrx));
+            
             if(h.magic!=PENG_MAGIC)
             {
                 /* fprintf(stderr, "DEBUG: FAILED: ver=%"PRIx16" cap=%"PRIx16" magic=%"PRIx32"\n", h.ver, h.cap, h.magic); */
