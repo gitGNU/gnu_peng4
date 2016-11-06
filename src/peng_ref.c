@@ -1,6 +1,6 @@
 /*
     PENG - A Permutation Engine
-    Copyright (C) 1998-2015 by Klaus-J. Wolf
+    Copyright (C) 1998-2016 by Klaus-J. Wolf
                                yanestra !at! lab6 !dot! seismic !dot! de
 
     This program is free software: you can redistribute it and/or modify
@@ -34,18 +34,8 @@
 #include "mt19937ar.h"
 #include "peng_ref.h"
 #include "peng_misc.h"
-#include "lpeng.h"
+#include "libpeng.h"
 
-
-#ifndef DORKINESS
-#define DORKINESS 0   /* set 0,1,2 */
-#endif
-#ifndef SKIP_XOR
-#define SKIP_XOR 0
-#endif
-#ifndef SKIP_PERMUT
-#define SKIP_PERMUT 0
-#endif
 
 #if DEBUG
 #define QBITCOPY(b1,o1,m1,b2,o2,m2) qbitcopy(b1,o1,m1,b2,o2,m2)

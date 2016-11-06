@@ -1,6 +1,6 @@
 /*
     PENG - A Permutation Engine
-    Copyright (C) 1998-2015 by Klaus-J. Wolf
+    Copyright (C) 1998-2016 by Klaus-J. Wolf
                                yanestra !at! lab6 !dot! seismic !dot! de
 
     This program is free software: you can redistribute it and/or modify

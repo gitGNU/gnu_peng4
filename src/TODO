@@ -2,8 +2,6 @@ BUGS
  * require double password entry on encryption
 
 COMPATIBILITY
- * delete, then open new files (break links)
- * byte order (alignment?) - implement rectify()
  * block encryption API (for things like TrueCrypt or dm-crypt)
  * maintain BSD compatibility; verify stdint.h (inttypes.h)
  * disable USE_XYZ compile time configuration

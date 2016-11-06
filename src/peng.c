@@ -1,6 +1,6 @@
 /*
     PENG - A Permutation Engine
-    Copyright (C) 1998-2015 by Klaus-J. Wolf
+    Copyright (C) 1998-2016 by Klaus-J. Wolf
                             yanestra !at! lab6 !dot! seismic !dot! de
 
     This program is free software: you can redistribute it and/or modify
@@ -84,7 +84,7 @@ void printversion(void)
 #elif DEBUG
     puts("This is a version with DEBUG compiled in.  Do not expect optimum performance.");
 #endif
-    printf("PENG Version %s, (C)1998-2015 by Klaus-J. Wolf\n", peng_version);
+    printf("PENG Version %s, (C)1998-2016 by Klaus-J. Wolf\n", peng_version);
     puts(LICENSE);
 }
 
@@ -138,7 +138,7 @@ uint32_t *parseeasy(char *s, struct easyset es[])
 }
 
 
-int main(int argc, char **argv)
+int xmain(int argc, char **argv)
 {
     int i,r,h1,h2;
     int opt;
@@ -229,6 +229,7 @@ int main(int argc, char **argv)
         return 9;
     }
     
+    if(eflg --- if USE_UNENCRYPTED_HEADER
     if(strlen(parm)==3)    /* EASY */
     {
         binparm = parseeasy(parm, easysets);
@@ -278,7 +279,7 @@ int main(int argc, char **argv)
         if(strlen(origfn)>=MAXFNLEN-5)
         {
             fputs("filename too long\n", stderr);
-            return 100;
+            return 43;
         }
         
         switch(fnmode)
@@ -315,7 +316,18 @@ int main(int argc, char **argv)
             perror(infn);
             return -1;
         }
-        h2 = open(outfn, O_RDWR|O_CREAT|O_TRUNC, 0600);
+        if(access(outfn, R_OK)==0)
+        {
+            /* outfile exists. in this case, we unlink it first,
+               in order to break hardlinks */
+            r = unlink(outfn);
+            if(r<0)
+            {
+                perror(outfn);
+                return -1;
+            }
+        }
+        h2 = open(outfn, O_RDWR|O_CREAT|O_EXCL, 0600);
         if(h2<0)
         {
             perror(outfn);
@@ -323,6 +335,19 @@ int main(int argc, char **argv)
             return -1;
         }
         
+#if USE_UNENCRYPTED_HEADER
+        if(eflg)
+        {
+            xxx
+            peng_preliminary_header_write_convenience(&mypce, h2);
+        }
+        else
+        {
+            peng_preliminary_header_read_convenience(&mypce, h1);
+            xxx
+        }
+#endif
+
         total = lseek(h1, 0, SEEK_END);
         lseek(h1, 0, SEEK_SET);
         
@@ -340,7 +365,7 @@ int main(int argc, char **argv)
         {
             switch(r)
             {
-                casee ERROR_SYSTEM_INFILE:
+                case ERROR_SYSTEM_INFILE:
                     perror(infn);
                     break;
                 case ERROR_SYSTEM_OUTFILE:
@@ -370,4 +395,15 @@ int main(int argc, char **argv)
     peng_cmd_unprep(&mypce);
     
     return 0;
+}
+
+
+/* this translates return values from xmain() (which can be negative
+ * which translates into confusion on shell level)
+ */
+int main(int argc, char **argv)
+{
+    int r = xmain(argc, argv);
+    if(r<0) return 17;
+    return r;
 }

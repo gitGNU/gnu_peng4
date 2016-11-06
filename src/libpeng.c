@@ -1,6 +1,6 @@
 /*
     PENG - A Permutation Engine
-    Copyright (C) 1998-2015 by Klaus-J. Wolf
+    Copyright (C) 1998-2016 by Klaus-J. Wolf
                                yanestra !at! lab6 !dot! seismic !dot! de
 
     This program is free software: you can redistribute it and/or modify
@@ -55,31 +55,35 @@ void peng_unit_prep(void)
 }
 
 
-int peng_preliminary_header_read_convenience(struct peng_file_header_unencrypted *hue, int f)
+int peng_preliminary_header_read_convenience(struct peng_cmd_environment *pce, int f)
 {
     struct peng_file_header_unencrypted h;
     int r;
+    
+    peng_unit_prep();
     
     r=read(f, &h, sizeof h);
     if(r<0)
         return -1;
-    hue->blksize = cvt_to_system64(h.blksize);
-    hue->rounds = cvt_to_system64(h.rounds);
-    hue->variations = cvt_to_system64(h.variations);
-    hue->extra = cvt_to_system64(h.extra);
+    pce->htrx0.blksize = cvt_to_system64(h.blksize);
+    pce->htrx0.rounds = cvt_to_system64(h.rounds);
+    pce->htrx0.variations = cvt_to_system64(h.variations);
+    pce->htrx0.extra = cvt_to_system64(h.extra);
     return 0;
 }
 
 
-int peng_preliminary_header_write_convenience(struct peng_file_header_unencrypted *hue, int f)
+int peng_preliminary_header_write_convenience(struct peng_cmd_environment *pce, int f)
 {
     struct peng_file_header_unencrypted h;
     int r;
     
-    h.blksize = cvt_from_system64(hue->blksize);
-    h.rounds = cvt_from_system64(hue->rounds);
-    h.variations = cvt_from_system64(hue->variations);
-    h.extra = cvt_from_system64(hue->extra);
+    peng_unit_prep();
+    
+    h.blksize = cvt_from_system64(pce->htrx0.blksize);
+    h.rounds = cvt_from_system64(pce->htrx0.rounds);
+    h.variations = cvt_from_system64(pce->htrx0.variations);
+    h.extra = cvt_from_system64(pce->htrx0.extra);
     r=write(f, &h, sizeof h);
     if(r<0)
         return -2;

@@ -1,6 +1,6 @@
 /*
     PENG - A Permutation Engine
-    Copyright (C) 1998-2015 by Klaus-J. Wolf
+    Copyright (C) 1998-2016 by Klaus-J. Wolf
                                yanestra !at! lab6 !dot! seismic !dot! de
 
     This program is free software: you can redistribute it and/or modify
@@ -65,8 +65,8 @@ struct peng_cmd_environment
 
 
 #if USE_UNENCRYPTED_HEADER
-int peng_preliminary_header_read_convenience(struct peng_file_header_unencrypted *hue, int f);
-int peng_preliminary_header_write_convenience(struct peng_file_header_unencrypted *hue, int f);
+int peng_preliminary_header_read_convenience(struct peng_cmd_environment *pce, int f);
+int peng_preliminary_header_write_convenience(struct peng_cmd_environment *pce, int f);
 #endif
 
 void peng_unit_prep(void); /* if you call peng_cmd_prep(), you don't need to call this one */
