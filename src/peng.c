@@ -336,10 +336,16 @@ int main(int argc, char **argv)
         close(h1);
         close(h2);
         
-        if(r>0)  /* checksum error */
+        if(r!=0)  /* error */
         {
             switch(r)
             {
+                casee -1:
+                    perror(infn);
+                    break;
+                case -2:
+                    perror(outfn);
+                    break;
                 case 1:
                     fprintf(stderr, "%s: checksum mismatch\n", argv[i]);
                     break;

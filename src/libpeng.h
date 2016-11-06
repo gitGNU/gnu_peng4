@@ -22,32 +22,45 @@ extern int verbosity;
 extern int debugmask;
 
 
+#if USE_UNENCRYPTED_HEADER
+struct peng_file_header_unencrypted
+{
+    uint64_t        blksize;
+    uint16_t        rounds;
+    uint16_t        variations;
+    uint32_t        extra;       /* as of now, this is just meaningless padding */
+};
+#endif
+
 struct peng_file_header
 {
     uint32_t        magic;
     uint32_t        headerlen;
     uint16_t        ver;
     uint16_t        cap;
+    uint32_t        extra;       /* as of now, this is just meaningless padding */
     uint64_t        totalsize;
     uint64_t        cksum;
-    /*
-    uint64_t        blksize;
-    uint16_t        rounds;
-    uint16_t        variations;
-    */
-    uint32_t        extra;       /* as of now, this is just meaningless padding */
 };
 
 struct peng_cmd_environment
 {
-    struct pengpipe         *pp;
-    struct mersennetwister   mt;
-    uint8_t                 *buf1, *buf2, *buf3;
-    uint64_t                 blksize, bufsize;
-    int                      eflag;
-    struct peng_file_header  htrx;
+    struct pengpipe                        *pp;
+    struct mersennetwister                  mt;
+    uint8_t                                *buf1, *buf2, *buf3;
+    uint64_t                                blksize, bufsize;
+    int                                     eflag;
+    struct peng_file_header                 htrx;
+#if USE_UNENCRYPTED_HEADER
+    struct peng_file_header_unencrypted     htrx0;
+#endif
 };
 
+
+#if USE_UNENCRYPTED_HEADER
+int peng_preliminary_header_read_convenience(struct peng_file_header_unencrypted *hue, int f);
+int peng_preliminary_header_write_convenience(struct peng_file_header_unencrypted *hue, int f);
+#endif
 
 void peng_unit_prep(void); /* if you call peng_cmd_prep(), you don't need to call this one */
 

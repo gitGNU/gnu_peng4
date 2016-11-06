@@ -55,6 +55,38 @@ void peng_unit_prep(void)
 }
 
 
+int peng_preliminary_header_read_convenience(struct peng_file_header_unencrypted *hue, int f)
+{
+    struct peng_file_header_unencrypted h;
+    int r;
+    
+    r=read(f, &h, sizeof h);
+    if(r<0)
+        return -1;
+    hue->blksize = cvt_to_system64(h.blksize);
+    hue->rounds = cvt_to_system64(h.rounds);
+    hue->variations = cvt_to_system64(h.variations);
+    hue->extra = cvt_to_system64(h.extra);
+    return 0;
+}
+
+
+int peng_preliminary_header_write_convenience(struct peng_file_header_unencrypted *hue, int f)
+{
+    struct peng_file_header_unencrypted h;
+    int r;
+    
+    h.blksize = cvt_from_system64(hue->blksize);
+    h.rounds = cvt_from_system64(hue->rounds);
+    h.variations = cvt_from_system64(hue->variations);
+    h.extra = cvt_from_system64(hue->extra);
+    r=write(f, &h, sizeof h);
+    if(r<0)
+        return -2;
+    return 0;
+}
+
+
 /* attention ! passphrase will be erased ! */
 void peng_cmd_prep(struct peng_cmd_environment *pce, uint64_t blksize, uint32_t rounds, uint32_t variations, char *passphrase, int eflag)
 {
@@ -126,6 +158,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
         hwrit.totalsize = cvt_from_system64(h.totalsize);
         hwrit.cksum = cvt_from_system64(h.cksum);
         hwrit.magic = cvt_from_system32(h.magic);
+        hwrit.extra = cvt_from_system32(h.extra);
         hwrit.cap = cvt_from_system16(h.cap);
         hwrit.ver = cvt_from_system16(h.ver);
         
@@ -145,7 +178,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
         i = read(inh, pce->buf1+off, pce->bufsize-off);
         if(i<0)
         {
-            perror(infn);
+            /* perror(infn); */
             return -1;
         }
         
@@ -176,6 +209,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
             h.ver = cvt_to_system16(h.ver);
             h.cap = cvt_to_system16(h.cap);
             h.magic = cvt_to_system32(h.magic);
+            h.extra = cvt_to_system32(h.extra);
             h.headerlen = cvt_to_system32(h.headerlen);
             h.totalsize = cvt_to_system64(h.totalsize);
             h.cksum = cvt_to_system64(h.cksum);
@@ -197,8 +231,8 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
         j = write(outh, pce->buf3+off, k-off);
         if(j<0)
         {
-            perror(outfn);
-            return -1;
+            /* perror(outfn); */
+            return -2;
         }
         if(k-off!=j)
         {
@@ -218,8 +252,8 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
             r = ftruncate(outh, h.totalsize);
             if(r)
             {
-                perror(outfn);
-                return -1;
+                /* perror(outfn); */
+                return -2;
             }
         }
         lseek(outh, 0, SEEK_SET); /* some ftruncate()s work by re-positioning */
