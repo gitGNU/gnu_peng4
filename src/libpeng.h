@@ -18,6 +18,13 @@
 */
 
 
+#define ERROR_SYSTEM_INFILE    -1
+#define ERROR_SYSTEM_OUTFILE   -2
+#define ERROR_CHECKSUM          1
+#define ERROR_MAGIC             2
+#define ERROR_COMPAT            3
+
+
 extern int verbosity;
 extern int debugmask;
 

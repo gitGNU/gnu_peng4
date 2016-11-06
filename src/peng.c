@@ -340,19 +340,19 @@ int main(int argc, char **argv)
         {
             switch(r)
             {
-                casee -1:
+                casee ERROR_SYSTEM_INFILE:
                     perror(infn);
                     break;
-                case -2:
+                case ERROR_SYSTEM_OUTFILE:
                     perror(outfn);
                     break;
-                case 1:
+                case ERROR_CHECKSUM:
                     fprintf(stderr, "%s: checksum mismatch\n", argv[i]);
                     break;
-                case 2:
+                case ERROR_MAGIC:
                     fprintf(stderr, "%s: magic missing (password wrong?)\n", argv[i]);
                     break;
-                case 3:
+                case ERROR_COMPAT:
                     fprintf(stderr, "%s: compatibility (version or capabilities) failure\n", argv[i]);
                     break;
             }

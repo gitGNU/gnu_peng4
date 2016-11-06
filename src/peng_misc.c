@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "sysparm.h"
 #include "peng_misc.h"
@@ -264,6 +265,7 @@ void rectify32(const char *from_order, const char *to_order, void *ptr, int numb
 {
     uint32_t x;
     
+    assert((numbytes%4)==0);
     while(numbytes>0)
     {
         x = byte_reorder32(from_order, to_order, *(uint32_t *)ptr);
@@ -288,7 +290,7 @@ int strstrix(const char *haystack, const char *needle)
     return -1;
 }
 
-
+    
 /* TODO: check */
 int count_occurrences(const char *haystack, const char *needle)
 {

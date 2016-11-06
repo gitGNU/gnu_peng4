@@ -179,7 +179,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
         if(i<0)
         {
             /* perror(infn); */
-            return -1;
+            return ERROR_SYSTEM_INFILE;
         }
         
         i += off;
@@ -219,12 +219,12 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
             if(h.magic!=PENG_MAGIC)
             {
                 /* fprintf(stderr, "DEBUG: FAILED: ver=%"PRIx16" cap=%"PRIx16" magic=%"PRIx32"\n", h.ver, h.cap, h.magic); */
-                return 2;
+                return ERROR_MAGIC;
             }
             if(h.ver>PENG_VER || h.cap!=PENG_CAP)
             {
                 /* fprintf(stderr, "DEBUG: FAILED: ver=%"PRIx16" cap=%"PRIx16" magic=%"PRIx32"\n", h.ver, h.cap, h.magic);  */
-                return 3;
+                return ERROR_COMPAT;
             }
         }
         
@@ -232,7 +232,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
         if(j<0)
         {
             /* perror(outfn); */
-            return -2;
+            return ERROR_SYSTEM_OUTFILE;
         }
         if(k-off!=j)
         {
@@ -253,14 +253,14 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
             if(r)
             {
                 /* perror(outfn); */
-                return -2;
+                return ERROR_SYSTEM_OUTFILE;
             }
         }
         lseek(outh, 0, SEEK_SET); /* some ftruncate()s work by re-positioning */
         cksum = wolf64(outh);
         /* fprintf(stderr, "DEBUG: %08lx (now) %"PRIx64" (stored)\n", cksum, h.cksum); */
         if(cksum!=h.cksum)
-            return 1;
+            return ERROR_MAGIC;
     }
     
     /* DEBUG_TIMING(1, "peng_cmd_process_1") */
