@@ -142,7 +142,7 @@ int xmain(int argc, char **argv)
 {
     int i,r,h1,h2;
     int opt;
-    char *parm = "1024,1,1";
+    char *parm = strdup("1024,1,1");
     int eflag = 1;
     int multithreading = 0;
     int delflag;
@@ -152,7 +152,6 @@ int xmain(int argc, char **argv)
     uint32_t rounds, variations;
     struct peng_cmd_environment mypce;
     char *origfn, infn[MAXFNLEN], outfn[MAXFNLEN], *passphrase=NULL;
-    uint64_t total;
 
     if(argc<=1)
     {
@@ -229,7 +228,6 @@ int xmain(int argc, char **argv)
         return 9;
     }
     
-    if(eflg --- if USE_UNENCRYPTED_HEADER
     if(strlen(parm)==3)    /* EASY */
     {
         binparm = parseeasy(parm, easysets);
@@ -254,15 +252,8 @@ int xmain(int argc, char **argv)
     variations = binparm[3];
     FREE(binparm);
     
-    if(verbosity>0)
-    {
-        printf("blksize=%" PRIu64 " variations=%" PRIu32 " rounds=%" PRIu32 "\n", blksize, variations, rounds);
-    }
-    
     if(!passphrase)
         passphrase = getpass("PENG Password: ");
-    
-    peng_cmd_prep(&mypce, blksize, rounds, variations, passphrase, eflag);
     
     if(verbosity>2)
     {
@@ -336,27 +327,50 @@ int xmain(int argc, char **argv)
         }
         
 #if USE_UNENCRYPTED_HEADER
-        if(eflg)
+        /* mypce.off = sizeof(mypce.htrx0); */
+        if(eflag)
         {
-            xxx
-            peng_preliminary_header_write_convenience(&mypce, h2);
+            mypce.htrx0.blksize = blksize;
+            mypce.htrx0.rounds = rounds;
+            mypce.htrx0.variations = variations;
+            mypce.htrx0.extra = 0;
+            r = peng_preliminary_header_write_convenience(&mypce, h2);
         }
         else
         {
-            peng_preliminary_header_read_convenience(&mypce, h1);
-            xxx
+            r = peng_preliminary_header_read_convenience(&mypce, h1);
+            blksize = mypce.htrx0.blksize;
+            rounds = mypce.htrx0.rounds;
+            variations = mypce.htrx0.variations;
+            /* total -= mypce.off; */
         }
+        switch(r)
+        {
+            case ERROR_SYSTEM_INFILE:
+                perror(infn);
+                break;
+            case ERROR_SYSTEM_OUTFILE:
+                perror(outfn);
+                break;
+        }
+        /* printf("DEBUG: infile pos = %lu,%lu\n", (unsigned long)lseek(h1, 0, SEEK_CUR), (unsigned long)lseek(h2, 0, SEEK_CUR)); */
+#else
+        /* mypce.off = 0; */
 #endif
-
-        total = lseek(h1, 0, SEEK_END);
-        lseek(h1, 0, SEEK_SET);
+        peng_cmd_prep(&mypce, blksize, rounds, variations, passphrase, eflag);
+    
+        if(verbosity>0)
+        {
+            printf("blksize=%" PRIu64 " variations=%" PRIu32 " rounds=%" PRIu32 "\n", blksize, variations, rounds);
+        }
         
+
         if(verbosity>0)
         {
             printf("%30s   -%c->    %-30s\n", infn, eflag ? 'e':'d', outfn);
             fflush(stdout);
         }
-        r = peng_cmd_process(&mypce, infn, h1, total, outfn, h2, multithreading, MIN_LOCRR_SEQ_LEN);
+        r = peng_cmd_process(&mypce, infn, h1, outfn, h2, multithreading, MIN_LOCRR_SEQ_LEN);
         
         close(h1);
         close(h2);

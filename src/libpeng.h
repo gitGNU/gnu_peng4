@@ -73,6 +73,6 @@ void peng_unit_prep(void); /* if you call peng_cmd_prep(), you don't need to cal
 
 void peng_cmd_prep(struct peng_cmd_environment *pce, uint64_t blksize, uint32_t rounds, uint32_t variations, char *passphrase, int eflag);
 
-int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, uint64_t total, const char *outfn, int outh, char multithreading, char min_locrr_seq_len);
+int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, const char *outfn, int outh, char multithreading, char min_locrr_seq_len);
 
 void peng_cmd_unprep(struct peng_cmd_environment *pce);

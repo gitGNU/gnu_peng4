@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <assert.h>
 
 #include "sysparm.h"
 #include "whirlpool.h"
@@ -55,6 +56,7 @@ void peng_unit_prep(void)
 }
 
 
+#if USE_UNENCRYPTED_HEADER
 int peng_preliminary_header_read_convenience(struct peng_cmd_environment *pce, int f)
 {
     struct peng_file_header_unencrypted h;
@@ -80,6 +82,13 @@ int peng_preliminary_header_write_convenience(struct peng_cmd_environment *pce, 
     
     peng_unit_prep();
     
+    /* this is done by the caller:
+    pce->htrx0.blksize = pce->pp->blksize;
+    pce->htrx0.rounds = pce->pp->rounds;
+    pce->htrx0.variations = pce->pp->variations;
+    pce->htrx0.extra = 0;
+    */
+
     h.blksize = cvt_from_system64(pce->htrx0.blksize);
     h.rounds = cvt_from_system64(pce->htrx0.rounds);
     h.variations = cvt_from_system64(pce->htrx0.variations);
@@ -89,6 +98,7 @@ int peng_preliminary_header_write_convenience(struct peng_cmd_environment *pce, 
         return -2;
     return 0;
 }
+#endif
 
 
 /* attention ! passphrase will be erased ! */
@@ -132,14 +142,16 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, uint64_t blksize, uint32_t 
 }
 
 
-int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, uint64_t total, const char *outfn, int outh, char multithreading, char min_locrr_seq_len)
+int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, const char *outfn, int outh, char multithreading, char min_locrr_seq_len)
 {
     int i,j,k,r;
     int firstblock;
     uint32_t num=0, off=0;
-    uint64_t pos=0, cksum;
+    uint64_t pos, cksum;
     struct peng_file_header h;
     struct peng_file_header hwrit;
+    
+    assert(sizeof h <= pce->pp->blksize);
     
     memset(&h, 0, sizeof h);  /* valgrind owed */
     memset(&hwrit, 0, sizeof hwrit);
@@ -147,9 +159,9 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
     
     if(pce->eflag)
     {
-        lseek(inh, 0, SEEK_SET);
+        /* lseek(inh, 0, SEEK_SET); */
         h.cksum = wolf64(inh);
-        h.totalsize = lseek(inh, 0, SEEK_END);   /* it is already at the end... */
+        h.totalsize = lseek(inh, 0, SEEK_END);  /* it is already at the end... */
         h.headerlen = sizeof h; 
         h.magic = PENG_MAGIC;
         h.cap = PENG_CAP;
@@ -264,7 +276,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
         cksum = wolf64(outh);
         /* fprintf(stderr, "DEBUG: %08lx (now) %"PRIx64" (stored)\n", cksum, h.cksum); */
         if(cksum!=h.cksum)
-            return ERROR_MAGIC;
+            return ERROR_CHECKSUM;
     }
     
     /* DEBUG_TIMING(1, "peng_cmd_process_1") */
