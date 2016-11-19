@@ -12,6 +12,7 @@ SECURITY
 
 SECURITY (MINOR)
  * erase buffers after use
+ * remove password from command line shown
 
 OPTIMIZATION
  * offset initialization for thread's Mersenne Twister (when generating mtx)
@@ -21,6 +22,9 @@ LUXURY
  * binary tarball / rpm / deb
  * src subdir and more advanced fs hierarchy
  * exported API (libpeng)
+ * progress in percent
+ * -compression-
+ * shred original file (if desired)
 
 DOCUMENTATION
  * doxygen
@@ -33,6 +37,7 @@ DEBUG
  * get rid of testing defines
  * better Makefile concept (maybe cmake?) for generating flavoured bins
    without need to edit the Makefile
+ * check -D, -R mechanism
 
 TEST
  * automated test (write some tools and create a test parameter table)
