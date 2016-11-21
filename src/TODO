@@ -29,6 +29,10 @@ LUXURY
 DOCUMENTATION
  * doxygen
 
+FIXME
+ * trying to decrypt a non-encrypted file leads to no error msg but
+   return value -1
+
 DEBUG
  * debug system (flags)
  * review MALLOC(), alloca()
@@ -40,23 +44,10 @@ DEBUG
  * check -D, -R mechanism
 
 TEST
+ * test bit ordering
  * automated test (write some tools and create a test parameter table)
 
 PUBLIC
  * ask for code review
 
  
-################################################
-################################################
-################################################
-
-
-DONE
- X CBC(X-P-X)
- X padding in peng_cmd_process()
- X verbosity>2 displays keys
- X shorten files (may fail if length difference < 3)
- X multithreading (variations in parallel)
- X test n byte length difference problem
- X allow negative offset of EOF marker
- X make levels of dorkiness (dorkicity, dorkision, dorkibility)
