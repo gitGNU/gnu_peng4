@@ -138,6 +138,13 @@ uint32_t *parseeasy(char *s, struct easyset es[])
 }
 
 
+void progressmeter(uint64_t p, uint64_t m)
+{
+    printf("%6.2f%% done\r", (double)p/(double)m*1e2);
+    fflush(stdout);
+}
+
+
 int xmain(int argc, char **argv)
 {
     int i,r,h1,h2;
@@ -380,7 +387,7 @@ int xmain(int argc, char **argv)
             printf("%30s   -%c->    %-30s\n", infn, eflag ? 'e':'d', outfn);
             fflush(stdout);
         }
-        r = peng_cmd_process(&mypce, infn, h1, outfn, h2, multithreading, MIN_LOCRR_SEQ_LEN);
+        r = peng_cmd_process(&mypce, infn, h1, outfn, h2, multithreading, MIN_LOCRR_SEQ_LEN, (verbosity>1)?progressmeter:NULL);
         
         close(h1);
         close(h2);

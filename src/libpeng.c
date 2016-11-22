@@ -145,11 +145,11 @@ void peng_cmd_prep(struct peng_cmd_environment *pce, uint64_t blksize, uint32_t 
 }
 
 
-int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, const char *outfn, int outh, char multithreading, char min_locrr_seq_len)
+int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, const char *outfn, int outh, char multithreading, char min_locrr_seq_len, progress_meter pm)
 {
     int i,j,k,r;
     int firstblock;
-    uint32_t num=0, off=0;
+    uint32_t off=0;
     uint64_t pos, cksum;
     struct peng_file_header h;
     struct peng_file_header hwrit;
@@ -185,13 +185,11 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
         off = sizeof h;
     }
 
+    pos=off;  /* pos (in this loop) is only used temporarily for display purposes */
     for(firstblock=1; ; firstblock=0)
     {
-        if(verbosity>1)
-        {
-            printf("block #%u\r", ++num);
-            fflush(stdout);
-        }
+        if(pm)
+            pm(pos, h.totalsize);
         
         /* memset(pce->buf1, 0, pce->bufsize); */
         i = read(inh, pce->buf1+off, pce->bufsize-off);
@@ -206,6 +204,7 @@ int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh
             break;
         
         off = 0;
+        pos += i;
         
         if(pce->eflag && i<pce->bufsize)
         {

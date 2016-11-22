@@ -6,19 +6,17 @@ COMPATIBILITY
 SECURITY
  * erase mtx from memory
  * unfold repetitions (according to classical block cipher scheme)
-
-SECURITY (MINOR)
- * erase buffers after use
+ * erase buffers after use (also password handling buffers)
  * remove password from command line shown
 
 OPTIMIZATION
  * offset initialization for thread's Mersenne Twister (when generating mtx)
+   for multithreading
 
 LUXURY
  * binary tarball / rpm / deb
  * src subdir and more advanced fs hierarchy
  * exported API (libpeng)
- * progress in percent
  * compression?
  * shred original file (if desired)
 

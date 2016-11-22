@@ -65,6 +65,9 @@ struct peng_cmd_environment
 };
 
 
+typedef void (*progress_meter)(uint64_t,uint64_t);
+
+
 #if USE_UNENCRYPTED_HEADER
 int peng_preliminary_header_read_convenience(struct peng_cmd_environment *pce, int f);
 int peng_preliminary_header_write_convenience(struct peng_cmd_environment *pce, int f);
@@ -74,6 +77,6 @@ void peng_unit_prep(void); /* if you call peng_cmd_prep(), you don't need to cal
 
 void peng_cmd_prep(struct peng_cmd_environment *pce, uint64_t blksize, uint32_t rounds, uint32_t variations, char *passphrase, int eflag);
 
-int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, const char *outfn, int outh, char multithreading, char min_locrr_seq_len);
+int peng_cmd_process(struct peng_cmd_environment *pce, const char *infn, int inh, const char *outfn, int outh, char multithreading, char min_locrr_seq_len, progress_meter pm);
 
 void peng_cmd_unprep(struct peng_cmd_environment *pce);
