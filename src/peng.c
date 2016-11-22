@@ -253,7 +253,8 @@ int xmain(int argc, char **argv)
     FREE(binparm);
     
     if(!passphrase)
-        passphrase = getpass("PENG Password: ");
+        passphrase = mygetpass("PENG Password: ", eflag?"Please repeat: ":NULL, eflag?"Password mismatch.":NULL);
+        
     
     if(verbosity>2)
     {

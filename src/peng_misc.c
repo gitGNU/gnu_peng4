@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <termios.h>
+#include <unistd.h>
 #include <assert.h>
 
 #include "sysparm.h"
@@ -365,3 +367,72 @@ const char *quickrepl_dyn(const char *fmt, const char *orig, const char *dest)
     return buf;
 }
 
+
+void eliminate_lf(char *s)
+{
+    for(;*s;s++)
+        if(*s=='\n')
+        {
+            *s=0;
+            break;
+        }
+}
+
+
+#define BUFLEN 120
+
+char *mygetpass(const char *prompt, const char *prompt2, const char *errmsg)
+{
+    char buf[BUFLEN], buf2[BUFLEN];
+    struct termios old, new;
+
+    /* Turn echoing off and fail if we can't. */
+    if (tcgetattr(fileno(stdin), &old) != 0)
+        return NULL;
+    new = old;
+    new.c_lflag &= ~ECHO;
+    if (tcsetattr(fileno(stdin), TCSAFLUSH, &new) != 0)
+        return NULL;
+
+    for(;;)
+    {
+        /* Display the prompt. */
+        fputs(prompt, stdout);
+        fflush(stdout);
+
+        /* Read the password. */
+        if(!fgets(buf, BUFLEN - 1, stdin))
+            return NULL;
+        buf[BUFLEN - 1] = 0;
+        fputc('\n', stdout);
+
+        eliminate_lf(buf);
+        
+        if(prompt2)
+        {
+            /* Display the prompt. */
+            fputs(prompt2, stdout);
+            fflush(stdout);
+
+            /* Read the password. */
+            if(!fgets(buf2, BUFLEN - 1, stdin))
+                return NULL;
+            buf2[BUFLEN - 1] = 0;
+            fputc('\n', stdout);
+
+            eliminate_lf(buf2);
+            
+            if(!strcmp(buf, buf2))
+                break;
+            
+            fputs(errmsg, stdout);
+        }
+        else
+            break;
+    }
+    
+    /* Restore terminal. */
+    tcsetattr(fileno(stdin), TCSAFLUSH, &old);
+
+    return strdup(buf);
+}

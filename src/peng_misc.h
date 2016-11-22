@@ -53,6 +53,8 @@ void quickrepl(char *buf, const char *orig, const char *dest);
 
 const char *quickrepl_dyn(const char *fmt, const char *orig, const char *dest);
 
+char *mygetpass(const char *prompt, const char *prompt2, const char *errmsg);
+
 
 #define cvt_to_system16(n) byte_reorder16(TARGET_BYTEORDER16, SYSTEM_BYTEORDER16, n)
 #define cvt_to_system32(n) byte_reorder32(TARGET_BYTEORDER32, SYSTEM_BYTEORDER32, n)
