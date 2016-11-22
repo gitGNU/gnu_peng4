@@ -344,14 +344,23 @@ int xmain(int argc, char **argv)
             variations = mypce.htrx0.variations;
             /* total -= mypce.off; */
         }
-        switch(r)
+        if(r!=0)
         {
-            case ERROR_SYSTEM_INFILE:
-                perror(infn);
-                break;
-            case ERROR_SYSTEM_OUTFILE:
-                perror(outfn);
-                break;
+            switch(r)
+            {
+                case ERROR_SYSTEM_INFILE:
+                    perror(infn);
+                    break;
+                case ERROR_SYSTEM_OUTFILE:
+                    perror(outfn);
+                    break;
+                case ERROR_MAGIC:
+                    fprintf(stderr, "%s: bad magic\n", infn);
+                    break;
+                default:
+                    fprintf(stderr, "unspecified or undefined error %d\n", r);
+            }
+            return 10;
         }
         /* printf("DEBUG: infile pos = %lu,%lu\n", (unsigned long)lseek(h1, 0, SEEK_CUR), (unsigned long)lseek(h2, 0, SEEK_CUR)); */
 #else
@@ -394,6 +403,8 @@ int xmain(int argc, char **argv)
                 case ERROR_COMPAT:
                     fprintf(stderr, "%s: compatibility (version or capabilities) failure\n", argv[i]);
                     break;
+                default:
+                    fprintf(stderr, "unspecified or undefined error %d\n", r);
             }
             return 10;
         }

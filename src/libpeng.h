@@ -32,6 +32,7 @@ extern int debugmask;
 #if USE_UNENCRYPTED_HEADER
 struct peng_file_header_unencrypted
 {
+    uint64_t        magic;
     uint64_t        blksize;
     uint16_t        rounds;
     uint16_t        variations;

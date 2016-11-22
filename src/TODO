@@ -29,10 +29,6 @@ LUXURY
 DOCUMENTATION
  * doxygen
 
-FIXME
- * trying to decrypt a non-encrypted file leads to no error msg but
-   return value -1
-
 DEBUG
  * debug system (flags)
  * review MALLOC(), alloca()

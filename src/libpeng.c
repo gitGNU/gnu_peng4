@@ -42,6 +42,7 @@ static int init_done = 0;
 
 
 #define COMBINED_DIGEST_SIZE (WHIRLPOOL_DIGESTBYTES+SHA512_DIGEST_SIZE)
+#define PENG_UE_MAGIC UINT64_C(0xc1f1046a6023174a)
 #define PENG_MAGIC UINT32_C(0xec1f4a11)
 #define PENG_VER UINT16_C(0)
 #define PENG_CAP UINT16_C(0)
@@ -66,12 +67,13 @@ int peng_preliminary_header_read_convenience(struct peng_cmd_environment *pce, i
     
     r=read(f, &h, sizeof h);
     if(r<0)
-        return -1;
+        return ERROR_SYSTEM_INFILE;
+    pce->htrx0.magic = cvt_to_system64(h.magic);
     pce->htrx0.blksize = cvt_to_system64(h.blksize);
     pce->htrx0.rounds = cvt_to_system64(h.rounds);
     pce->htrx0.variations = cvt_to_system64(h.variations);
     pce->htrx0.extra = cvt_to_system64(h.extra);
-    return 0;
+    return (pce->htrx0.magic == PENG_UE_MAGIC) ? 0 : ERROR_MAGIC;
 }
 
 
@@ -89,13 +91,14 @@ int peng_preliminary_header_write_convenience(struct peng_cmd_environment *pce, 
     pce->htrx0.extra = 0;
     */
 
+    h.magic = cvt_from_system64(PENG_UE_MAGIC);
     h.blksize = cvt_from_system64(pce->htrx0.blksize);
     h.rounds = cvt_from_system64(pce->htrx0.rounds);
     h.variations = cvt_from_system64(pce->htrx0.variations);
     h.extra = cvt_from_system64(pce->htrx0.extra);
     r=write(f, &h, sizeof h);
     if(r<0)
-        return -2;
+        return ERROR_SYSTEM_OUTFILE;
     return 0;
 }
 #endif
