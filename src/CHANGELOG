@@ -56,4 +56,10 @@ DATE         VERSION
 
 bug fixes; unencrypted headers
 
+**********************
+DATE         VERSION
+2016-11-22   4.01.0082
+
+magic for unencrypted headers, progress meter, double pw entry
+
 

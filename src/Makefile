@@ -1,7 +1,8 @@
-DEFS = -DDEBUG=1 -DBETA=1 -DALPHA=0 -DLINUX=1 -DTESTARCH=0 -DAVOID_ALLOCA=1
+DEFS = -DDEBUG=1 -DBETA=1 -DALPHA=0 -DLINUX=1 -DTESTARCH=0 -DAVOID_ALLOCA=1 \
+ -DBYTEORDER_LO=1
 
-CFLAGS = -O3 -gdwarf-3 -Wall -Wno-pointer-sign -std=c90 -D_GNU_SOURCE \
- -I. -Iexternal/ -Lexternal/ -fstack-protector
+#CFLAGS = -O3 -gdwarf-3 -Wall -Wno-pointer-sign -std=c90 -D_GNU_SOURCE \
+# -I. -Iexternal/ -Lexternal/ -fstack-protector
 #CFLAGS = -ggdb -Wall -Wno-pointer-sign -std=c90 -D_GNU_SOURCE \
 # -I. -Iexternal/ -Lexternal/ -fstack-protector
 #CFLAGS = -gdwarf-3 -Wall -Wno-pointer-sign -std=c90 -D_GNU_SOURCE \
