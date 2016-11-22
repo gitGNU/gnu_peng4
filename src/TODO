@@ -14,6 +14,7 @@ OPTIMIZATION
    for multithreading
 
 LUXURY
+ * extend header format to be flexible for future extension
  * binary tarball / rpm / deb
  * src subdir and more advanced fs hierarchy
  * exported API (libpeng)
